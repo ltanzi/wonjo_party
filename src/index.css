@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design language ported from ../xarxa */
+
+:root {
+  --background: #ede8e0;
+  --foreground: #1a1a1a;
+}
+
+html {
+  background: var(--background);
+  /* Fractal-noise grain at 3.5% — keeps the flat colour from feeling like a screen */
+  background-image: url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+body {
+  color: var(--foreground);
+  font-family: "Inconsolata", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #1a1a1a;
+  color: #ede8e0;
+}
+
+a {
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+/* Native controls inherit the type stack rather than falling back to system UI */
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+@layer components {
+  /* The black title bar used for days, stages and section headers */
+  .bar {
+    @apply bg-fg px-2 py-1 font-mono text-[11px] uppercase tracking-wider text-bg;
+  }
+}

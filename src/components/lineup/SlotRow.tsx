@@ -1,0 +1,69 @@
+import { FormatBadge } from "@/components/ui/FormatBadge";
+import type { Slot } from "@/lib/types";
+import { formatRange, relativeTime } from "@/lib/time";
+
+/**
+ * Row treatment by booking status (SPEC.md):
+ *   confirmed  — solid, exactly like the reference timetable
+ *   idea/contacted — ghosted: dashed rule, muted, leading '?'
+ *   cancelled  — struck through in accent red
+ *
+ * Non-confirmed rows keep a transparent left border so nothing shifts
+ * horizontally when a slot is confirmed.
+ */
+const ghost = "border-l border-dashed border-fg/30 text-muted";
+
+const statusStyle: Record<Slot["status"], string> = {
+  confirmed: "border-l border-transparent",
+  idea: ghost,
+  contacted: ghost,
+  cancelled: "border-l border-dashed border-accent/40 text-accent line-through",
+};
+
+export function SlotRow({ slot, onEdit }: { slot: Slot; onEdit: () => void }) {
+  const unsettled = slot.status === "idea" || slot.status === "contacted";
+  const who = slot.updated_by ? slot.updated_by.split("@")[0] : null;
+
+  return (
+    <button
+      onClick={onEdit}
+      className={`block w-full pl-2 pr-1 py-1 text-left hover:bg-soft/60 ${statusStyle[slot.status]}`}
+    >
+      <div className="grid grid-cols-[4.75rem_1fr] items-baseline gap-2">
+        <span className="text-[11px] tabular-nums text-muted">
+          {formatRange(slot.start_time, slot.end_time)}
+        </span>
+
+        <div className="flex flex-wrap items-baseline gap-x-2">
+          <FormatBadge format={slot.format} />
+          <span className="uppercase">
+            {unsettled && <span className="mr-1 text-muted">?</span>}
+            {slot.artist_name || <span className="text-muted">untitled</span>}
+            {slot.country && <span className="text-muted"> ({slot.country})</span>}
+          </span>
+          {unsettled && (
+            <span className="font-mono text-[11px] uppercase tracking-wider text-muted">
+              · {slot.status}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {slot.notes && (
+        <div className="grid grid-cols-[4.75rem_1fr] gap-2">
+          <span />
+          <span className="text-[11px] text-muted">{slot.notes}</span>
+        </div>
+      )}
+
+      {who && (
+        <div className="grid grid-cols-[4.75rem_1fr] gap-2">
+          <span />
+          <span className="text-[11px] text-muted/70">
+            └ {who} · {relativeTime(slot.updated_at)}
+          </span>
+        </div>
+      )}
+    </button>
+  );
+}

@@ -1,0 +1,13 @@
+node_modules
+dist
+*.tsbuildinfo
+.DS_Store
+*.local
+.env
+.env.local
+.env.*.local
+
+# Never commit real festival data — the repo is public (SPEC.md, decision 6)
+*.local.json
+/export
+/private
