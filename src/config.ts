@@ -19,15 +19,61 @@ export const STAGES = [
   { key: "stage-isla", label: "ISLA" },
 ] as const;
 
+/**
+ * `owner` is social, not enforced — anyone may edit anything (decision 4). It just
+ * says who keeps this section, so people know whom to ask. Fill in the names;
+ * an empty string renders as unassigned.
+ */
 export const SECTIONS = [
-  { key: "lineup", label: "LINE-UP", bespoke: true },
-  { key: "production", label: "PRODUCTION" },
-  { key: "logistics", label: "LOGISTICS" },
-  { key: "communication", label: "COMMUNICATION" },
-  { key: "compilation", label: "COMPILATION" },
-  { key: "budget", label: "BUDGET" },
-  { key: "site", label: "DALLOU / SITE" },
-  { key: "team", label: "TEAM" },
+  {
+    key: "lineup",
+    label: "LINE-UP",
+    bespoke: true,
+    owner: "",
+    blurb: "Who plays, when, and on which stage. Each booking from first idea through to confirmed.",
+  },
+  {
+    key: "production",
+    label: "PRODUCTION",
+    owner: "",
+    blurb: "Stage build, sound, power, gear and suppliers. Everything that has to physically exist before the first act.",
+  },
+  {
+    key: "logistics",
+    label: "LOGISTICS",
+    owner: "",
+    blurb: "Travel, transport, beds and food. Getting people and things to Dallou, and keeping them there.",
+  },
+  {
+    key: "communication",
+    label: "COMMUNICATION",
+    owner: "",
+    blurb: "Poster, socials, press and the announcement calendar. Everything the outside world sees.",
+  },
+  {
+    key: "compilation",
+    label: "COMPILATION",
+    owner: "",
+    blurb: "The record. Tracks, masters, artwork and credits.",
+  },
+  {
+    key: "budget",
+    label: "BUDGET",
+    owner: "",
+    blurb: "Money in and money out. Fees, quotes, what is committed and what is still a guess.",
+  },
+  {
+    key: "site",
+    label: "DALLOU / SITE",
+    owner: "",
+    blurb: "The house and the ground it stands on. What is finished, what is needed, what must be ready by January.",
+  },
+  {
+    key: "team",
+    label: "TEAM",
+    owner: "",
+    blurb: "Who is on the crew, what they are responsible for, and how to reach them.",
+  },
 ] as const;
 
 /** Booking pipeline for a line-up slot. */
@@ -61,5 +107,6 @@ export type Format = (typeof FORMATS)[number]["key"];
 export const formatWeight = (format: string) =>
   FORMATS.find((f) => f.key === format)?.weight ?? "plain";
 
-export const sectionLabel = (key: string) =>
-  SECTIONS.find((s) => s.key === key)?.label ?? key.toUpperCase();
+export const findSection = (key: string) => SECTIONS.find((s) => s.key === key);
+
+export const sectionLabel = (key: string) => findSection(key)?.label ?? key.toUpperCase();

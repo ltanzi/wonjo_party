@@ -3,6 +3,7 @@ import { DAYS, SLOT_STATUS, STAGES } from "@/config";
 import { supabase } from "@/lib/supabase";
 import type { Slot } from "@/lib/types";
 import { Header } from "@/components/layout/Header";
+import { SectionHeader } from "@/components/layout/SectionHeader";
 import { SlotRow } from "@/components/lineup/SlotRow";
 import { SlotForm } from "@/components/lineup/SlotForm";
 
@@ -45,14 +46,17 @@ export function LineupPage() {
     <div className="mx-auto max-w-3xl px-4 py-6">
       <Header back />
 
-      <div className="mb-6 flex items-baseline justify-between gap-4">
-        <h1 className="font-mono text-sm uppercase tracking-widest">Line-up</h1>
-        {!loading && !error && (
-          <span className="font-mono text-[11px] uppercase tracking-wider text-muted">
-            {confirmed}/{active} confirmed
-          </span>
-        )}
-      </div>
+      <SectionHeader
+        sectionKey="lineup"
+        meta={
+          !loading &&
+          !error && (
+            <span className="whitespace-nowrap font-mono text-[11px] uppercase tracking-wider text-muted">
+              {confirmed}/{active} confirmed
+            </span>
+          )
+        }
+      />
 
       {loading && <p className="font-mono text-[11px] uppercase tracking-wider text-muted">…</p>}
       {error && <p className="font-mono text-[11px] text-accent">{error}</p>}

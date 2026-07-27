@@ -1,6 +1,7 @@
 import { Navigate, useParams } from "react-router-dom";
-import { SECTIONS, sectionLabel } from "@/config";
+import { findSection } from "@/config";
 import { Header } from "@/components/layout/Header";
+import { SectionHeader } from "@/components/layout/SectionHeader";
 
 /**
  * Placeholder until pass 2 replaces this with the generic board
@@ -9,14 +10,15 @@ import { Header } from "@/components/layout/Header";
  */
 export function SectionPage() {
   const { sectionKey } = useParams();
-  const known = SECTIONS.some((s) => s.key === sectionKey);
-  if (!known) return <Navigate to="/" replace />;
+  if (!sectionKey || !findSection(sectionKey)) return <Navigate to="/" replace />;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
       <Header back />
-      <div className="bar mb-4">{sectionLabel(sectionKey!)}</div>
-      <p className="text-[11px] uppercase tracking-wider text-muted">Board arrives in pass 2</p>
+      <SectionHeader sectionKey={sectionKey} />
+      <p className="border-t border-fg/15 pt-3 text-[11px] uppercase tracking-wider text-muted">
+        Board arrives in pass 2
+      </p>
     </div>
   );
 }
