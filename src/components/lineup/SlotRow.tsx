@@ -5,10 +5,15 @@ import { formatRange, relativeTime } from "@/lib/time";
 /**
  * Row treatment by booking status (SPEC.md):
  *   confirmed  — solid, exactly like the reference timetable
- *   idea/contacted — ghosted: dashed rule, muted, leading '?'
- *   cancelled  — struck through in accent red
+ *   idea/contacted — ghosted: dashed rule and muted text, so a day's real
+ *     content reads at a glance; the status word says which stage it is at
+ *   cancelled  — struck through in accent red, and hidden behind the
+ *     per-stage reveal on the line-up page
  *
- * Non-confirmed rows keep a transparent left border so nothing shifts
+ * The dashed rule and the grey are the scannable signal; the word is the
+ * precise one. There is deliberately no third marker duplicating them.
+ *
+ * Confirmed rows keep a transparent left border so nothing shifts
  * horizontally when a slot is confirmed.
  */
 const ghost = "border-l border-dashed border-fg/30 text-muted";
@@ -44,7 +49,6 @@ export function SlotRow({ slot, onEdit }: { slot: Slot; onEdit: () => void }) {
         <div className="flex flex-wrap items-baseline gap-x-2">
           <FormatBadge format={slot.format} />
           <span className={`uppercase ${cancelled ? "line-through" : ""}`}>
-            {unsettled && <span className="mr-1 text-muted">?</span>}
             {slot.artist_name || <span className="text-muted">untitled</span>}
             {slot.country && <span className="text-muted"> ({slot.country})</span>}
           </span>
