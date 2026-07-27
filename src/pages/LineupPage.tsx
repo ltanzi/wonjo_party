@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { DAYS, SLOT_STATUS, STAGES } from "@/config";
+import { DAYS, STAGES } from "@/config";
 import { supabase } from "@/lib/supabase";
 import type { Slot } from "@/lib/types";
 import { Header } from "@/components/layout/Header";
@@ -136,11 +136,6 @@ export function LineupPage() {
           ))}
       </div>
 
-      {!loading && !error && (
-        <p className="mt-8 border-t border-fg/15 pt-3 font-mono text-[11px] uppercase tracking-wider text-muted">
-          {SLOT_STATUS.join(" → ")}
-        </p>
-      )}
     </div>
   );
 }
