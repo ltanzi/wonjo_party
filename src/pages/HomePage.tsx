@@ -17,11 +17,17 @@ export function HomePage() {
       </p>
 
       <div className="grid grid-cols-2 gap-px bg-fg/15 sm:grid-cols-3">
-        {SECTIONS.map((section) => (
+        {SECTIONS.map((section, i) => (
           <Link
             key={section.key}
             to={`/${section.key}`}
-            className="group flex aspect-square flex-col items-center justify-center bg-bg p-3 text-center no-underline transition-colors hover:bg-fg"
+            // Eight tiles in a three-column grid leave one cell empty. Pushing the
+            // fifth tile to the last column moves that gap to the dead centre, so it
+            // reads as a deliberate block rather than a hole in the corner. Two
+            // columns on mobile divide evenly, so no nudge is needed there.
+            className={`group flex aspect-square flex-col items-center justify-center bg-bg p-3 text-center no-underline transition-colors hover:bg-fg ${
+              i === 4 ? "sm:col-start-3" : ""
+            }`}
           >
             <span className="font-mono text-[11px] uppercase tracking-widest text-fg group-hover:text-bg sm:text-xs">
               {section.label}
