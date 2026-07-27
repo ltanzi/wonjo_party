@@ -50,7 +50,6 @@ export function SlotRow({ slot, onEdit }: { slot: Slot; onEdit: () => void }) {
           <FormatBadge format={slot.format} />
           <span className={`uppercase ${cancelled ? "line-through" : ""}`}>
             {slot.artist_name || <span className="text-muted">untitled</span>}
-            {slot.country && <span className="text-muted"> ({slot.country})</span>}
           </span>
           {unsettled && (
             <span className="font-mono text-[11px] uppercase tracking-wider text-muted">

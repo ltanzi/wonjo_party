@@ -86,18 +86,25 @@ export const SLOT_STATUS = ["idea", "contacted", "confirmed", "cancelled"] as co
 export const ITEM_STATUS = ["todo", "doing", "done", "blocked"] as const;
 
 /**
- * Format badges. `weight` drives the visual treatment, following the Sónar
- * reference's logic: plain for the majority (badges everywhere would be noise),
- * solid for daytime programming, accent for the one special case.
+ * Format badges — a solid block of ink per format, so the shape of a day reads
+ * by colour before you read a word.
+ *
+ * The inks are chosen to sit on the paper ground like screenprint: desaturated,
+ * warm-leaning, none of them competing with the accent red used for errors and
+ * cancellations. Every pairing clears 4.5:1 against its text colour, checked at
+ * the 11px the badges actually render at.
+ *
+ * Full class strings, not composed ones — Tailwind scans source text, so
+ * `bg-[${hex}]` built at runtime would never be generated.
  */
 export const FORMATS = [
-  { key: "live", weight: "plain" },
-  { key: "Dj", weight: "plain" },
-  { key: "performance", weight: "plain" },
-  { key: "workshop", weight: "solid" },
-  { key: "talk", weight: "solid" },
-  { key: "film", weight: "solid" },
-  { key: "A/V", weight: "accent" },
+  { key: "live", badge: "bg-[#1A1A1A] text-bg" }, // black
+  { key: "dj", badge: "bg-[#2B5CA8] text-white" }, // blue
+  { key: "performance", badge: "bg-[#2E6B4F] text-white" }, // green
+  { key: "workshop", badge: "bg-[#B07A1E] text-fg" }, // ochre
+  { key: "talk", badge: "bg-[#6B4C8A] text-white" }, // purple
+  { key: "film", badge: "bg-[#7A4B32] text-white" }, // brown
+  { key: "A/V", badge: "bg-[#C9301F] text-white" }, // red
 ] as const;
 
 /** Stable identity for <Select options>, so the list isn't rebuilt every render. */
@@ -110,8 +117,8 @@ export type SlotStatus = (typeof SLOT_STATUS)[number];
 export type ItemStatus = (typeof ITEM_STATUS)[number];
 export type Format = (typeof FORMATS)[number]["key"];
 
-export const formatWeight = (format: string) =>
-  FORMATS.find((f) => f.key === format)?.weight ?? "plain";
+export const formatBadge = (format: string) =>
+  FORMATS.find((f) => f.key === format)?.badge ?? "bg-fg text-bg";
 
 export const findSection = (key: string) => SECTIONS.find((s) => s.key === key);
 

@@ -24,7 +24,6 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
   const [start, setStart] = useState(toInputTime(slot?.start_time ?? null));
   const [end, setEnd] = useState(toInputTime(slot?.end_time ?? null));
   const [format, setFormat] = useState<Format>(slot?.format ?? "live");
-  const [country, setCountry] = useState(slot?.country ?? "");
   const [status, setStatus] = useState<SlotStatus>(slot?.status ?? "idea");
   const [notes, setNotes] = useState(slot?.notes ?? "");
   const [busy, setBusy] = useState(false);
@@ -43,7 +42,6 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
       start_time: orNull(start),
       end_time: orNull(end),
       format,
-      country: orNull(country.toUpperCase()),
       status,
       notes: notes.trim(),
     };
@@ -80,9 +78,9 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
         />
       </div>
 
-      {/* Fixed at two columns: Tailwind breakpoints track the viewport, not the
-          container, so sm:grid-cols-4 would cram four fields into a ~380px day
-          column on desktop. Two columns fit everywhere this form appears. */}
+      {/* Two columns, fixed: Tailwind breakpoints track the viewport rather than
+          the container, so a responsive count would cram fields into a ~380px day
+          column on desktop. Two fit everywhere this form appears. */}
       <div className="mb-3 grid grid-cols-2 gap-2">
         <label className="block">
           <Label>Start</Label>
@@ -92,24 +90,16 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
           <Label>End</Label>
           <Input type="time" value={end} onChange={(e) => setEnd(e.target.value)} />
         </label>
-        <div>
-          <Label>Format</Label>
-          <Select
-            aria-label="Format"
-            value={format}
-            onChange={(v) => setFormat(v as Format)}
-            options={FORMAT_KEYS}
-          />
-        </div>
-        <label className="block">
-          <Label>Country</Label>
-          <Input
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            maxLength={3}
-            placeholder="GM"
-          />
-        </label>
+      </div>
+
+      <div className="mb-3">
+        <Label>Format</Label>
+        <Select
+          aria-label="Format"
+          value={format}
+          onChange={(v) => setFormat(v as Format)}
+          options={FORMAT_KEYS}
+        />
       </div>
 
       <div className="mb-3">

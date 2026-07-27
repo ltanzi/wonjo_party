@@ -34,7 +34,6 @@ create table if not exists public.slots (
   end_time    time,
   format      text not null default 'live',
   artist_name text not null default '',
-  country     text,                    -- 'GM', 'SN', … optional
   status      text not null default 'idea',
   notes       text not null default '',
   sort_order  int  not null default 0, -- ordering within a stage when times are null
@@ -45,7 +44,7 @@ create table if not exists public.slots (
     status in ('idea', 'contacted', 'confirmed', 'cancelled')
   ),
   constraint slots_format_valid check (
-    format in ('live', 'Dj', 'A/V', 'performance', 'workshop', 'talk', 'film')
+    format in ('live', 'dj', 'A/V', 'performance', 'workshop', 'talk', 'film')
   )
 );
 

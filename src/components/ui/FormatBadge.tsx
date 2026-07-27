@@ -1,19 +1,10 @@
-import { formatWeight } from "@/config";
+import { formatBadge } from "@/config";
 
-/**
- * Three weights, one rule (SPEC.md): plain for evening stage acts (the majority —
- * badges everywhere would be noise), solid for daytime programming, accent for A/V.
- */
-const weights = {
-  plain: "text-muted",
-  solid: "bg-fg text-bg px-1",
-  accent: "bg-accent text-white px-1",
-};
-
+/** A solid block of ink per format — see FORMATS in config.ts for the palette. */
 export function FormatBadge({ format }: { format: string }) {
   return (
     <span
-      className={`inline-block font-mono text-[11px] leading-tight ${weights[formatWeight(format)]}`}
+      className={`inline-block px-1 font-mono text-[11px] leading-tight ${formatBadge(format)}`}
     >
       {format}
     </span>

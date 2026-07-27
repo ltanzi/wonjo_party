@@ -8,7 +8,6 @@ export interface Slot {
   end_time: string | null;
   format: Format;
   artist_name: string;
-  country: string | null;
   status: SlotStatus;
   notes: string;
   sort_order: number;
