@@ -19,6 +19,23 @@ export const clockLabel = (iso: string) => {
   return `${String(d.getHours()).padStart(2, "0")}.${String(d.getMinutes()).padStart(2, "0")}`;
 };
 
+/** Board due dates: '2027-01-15' → '15 Jan'. */
+export function shortDate(iso: string) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const months = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ");
+  return `${d} ${months[m - 1]}${y !== new Date().getFullYear() ? ` ${y}` : ""}`;
+}
+
+/** Compared by date, not instant — a task due today is not yet late. */
+export function isOverdue(iso: string | null) {
+  if (!iso) return false;
+  const today = new Date();
+  const midnight = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
+    today.getDate(),
+  ).padStart(2, "0")}`;
+  return iso < midnight;
+}
+
 /** Coarse relative time for attribution lines: "2h ago", "3d ago". */
 export function relativeTime(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();

@@ -61,9 +61,30 @@ reference it.
 
 **Pass 1 — done.** Auth, the eight-square home page, and the full line-up section.
 
-**Pass 2 — not started.** The generic board across the other seven squares, and the
-offline read cache with staleness banner. The other eight crew accounts get created at
-the end of pass 2, not before — see decision 16 in `SPEC.md`.
+**Pass 2 — done.** The generic board across the other seven squares, and the offline
+read cache with staleness banner.
+
+**Remaining: create the other eight accounts and hand it over.** Same steps as the
+first two (Authentication → Users → Add user, Auto Confirm ticked). Delete the
+fictional seed rows first:
+
+```sql
+delete from public.slots;
+delete from public.items;
+```
+
+## Migrations
+
+`supabase/schema.sql` is the current shape — run it once on a fresh project.
+`supabase/migrations/` holds changes for a project that already exists; run them in
+order, once each. They are all safe to re-run.
+
+## Offline
+
+Every successful fetch is cached in `localStorage`, so the app renders instantly and
+still reads with no connection. When it can't reach Supabase a red bar appears saying
+when the data was last true, and editing is switched off — there is no write queue and
+no conflict resolution by design (`SPEC.md`, decision 13). Signing out clears the cache.
 
 ## Commands
 

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import { clearCache } from "@/lib/cache";
 
 interface AuthValue {
   session: Session | null;
@@ -37,6 +38,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: error?.message ?? null };
     },
     signOut: async () => {
+      // The offline cache holds crew data — don't leave it on a shared laptop
+      clearCache();
       await supabase.auth.signOut();
     },
   };

@@ -32,3 +32,35 @@ values
   ('day-3', 'stage-playa', '18:00', '19:30', 'performance', 'CLOSING CEREMONY',   'confirmed', '', 1),
   -- Sunday · ISLA
   ('day-3', 'stage-isla',  null,    null,    'live',        'JALI K.',            'idea',      'maybe an acoustic set', 0);
+
+-- ---------------------------------------------------------------- board items
+-- Also fictional. Delete with:  delete from public.items;
+
+insert into public.items
+  (section_key, title, owner, status, notes, due_date, sort_order)
+values
+  ('production',    'Generator + fuel for three days', 'Lamin', 'doing',   'two quotes in, waiting on a third', '2026-11-30', 0),
+  ('production',    'Sound system for PLAYA',          'Lamin', 'todo',    '', null, 1),
+  ('production',    'Shade structure over ISLA',       null,    'blocked', 'needs the site plan first', null, 2),
+  ('production',    'Stage decking',                   'Omar',  'done',    '', null, 3),
+
+  ('logistics',     'Airport pickups, 14 Jan',         'Awa',   'todo',    '', '2027-01-10', 0),
+  ('logistics',     'Beds for visiting artists',       'Awa',   'doing',   'six confirmed, need four more', null, 1),
+  ('logistics',     'Water and ice supply',            null,    'todo',    '', null, 2),
+
+  ('communication', 'Poster artwork',                  'Ikram', 'doing',   '', '2026-10-15', 0),
+  ('communication', 'Announce the first names',        'Ikram', 'blocked', 'waiting on the line-up to firm up', null, 1),
+  ('communication', 'Instagram account',               'Ikram', 'done',    '', null, 2),
+
+  ('compilation',   'Collect tracks from artists',     null,    'todo',    '', '2026-12-01', 0),
+  ('compilation',   'Mastering',                       null,    'todo',    '', null, 1),
+
+  ('budget',        'Sound system quote',              'Lamin', 'done',    'EUR 1,200 for the weekend', null, 0),
+  ('budget',        'Set the artist fee ceiling',      'Ikram', 'doing',   '', null, 1),
+
+  ('site',          'Shower block',                    'Omar',  'doing',   'walls up, no plumbing yet', '2026-12-15', 0),
+  ('site',          'Clear the ground by the river',   'Omar',  'todo',    'this becomes ISLA', null, 1),
+  ('site',          'Well and pump',                   'Omar',  'done',    '', null, 2),
+
+  ('team',          'Ikram Bouloum — line-up',         'Ikram', 'done',    '', null, 0),
+  ('team',          'Find a stage manager',            null,    'todo',    '', null, 1);

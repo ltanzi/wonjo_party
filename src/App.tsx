@@ -1,9 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/auth/AuthProvider";
 import { LoginPage } from "@/auth/LoginPage";
+import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { HomePage } from "@/pages/HomePage";
 import { LineupPage } from "@/pages/LineupPage";
-import { SectionPage } from "@/pages/SectionPage";
+import { BoardPage } from "@/pages/BoardPage";
 
 function Gate() {
   const { session, loading } = useAuth();
@@ -19,12 +20,15 @@ function Gate() {
   if (!session) return <LoginPage />;
 
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/lineup" element={<LineupPage />} />
-      <Route path="/:sectionKey" element={<SectionPage />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <OfflineBanner />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/lineup" element={<LineupPage />} />
+        <Route path="/:sectionKey" element={<BoardPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 

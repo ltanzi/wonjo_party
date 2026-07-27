@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { DAYS, STAGES } from "@/config";
 import { supabase } from "@/lib/supabase";
 import type { Slot } from "@/lib/types";
+import { useTable } from "@/lib/useTable";
+import { useOnline } from "@/lib/useOnline";
 import { Header } from "@/components/layout/Header";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { SlotRow } from "@/components/lineup/SlotRow";
@@ -10,33 +12,23 @@ import { SlotForm } from "@/components/lineup/SlotForm";
 type Editing = { kind: "edit"; id: string } | { kind: "new"; day: string; stage: string } | null;
 
 export function LineupPage() {
-  const [slots, setSlots] = useState<Slot[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const fetcher = useCallback(
+    () =>
+      supabase
+        .from("slots")
+        .select("*")
+        .order("start_time", { ascending: true, nullsFirst: false })
+        .order("sort_order", { ascending: true }),
+    [],
+  );
+
+  const { rows: slots, loading, error, reload } = useTable<Slot>("slots", fetcher);
+  const online = useOnline();
   const [editing, setEditing] = useState<Editing>(null);
-
-  const load = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("slots")
-      .select("*")
-      .order("start_time", { ascending: true, nullsFirst: false })
-      .order("sort_order", { ascending: true });
-
-    if (error) setError(error.message);
-    else {
-      setSlots(data as Slot[]);
-      setError(null);
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
 
   const done = () => {
     setEditing(null);
-    void load();
+    void reload();
   };
 
   // Cancelled slots stay in the data — the note explaining why is the point — but
@@ -117,6 +109,7 @@ export function LineupPage() {
                         <SlotRow
                           key={slot.id}
                           slot={slot}
+                          disabled={!online}
                           onEdit={() => setEditing({ kind: "edit", id: slot.id })}
                         />
                       ),
@@ -132,7 +125,7 @@ export function LineupPage() {
                     )}
 
                     <div className="mt-1 flex items-baseline gap-4 pl-2 font-mono text-[11px] uppercase tracking-wider">
-                      {!addingHere && (
+                      {online && !addingHere && (
                         <button
                           onClick={() =>
                             setEditing({ kind: "new", day: day.key, stage: stage.key })
@@ -168,6 +161,7 @@ export function LineupPage() {
                           <SlotRow
                             key={slot.id}
                             slot={slot}
+                            disabled={!online}
                             onEdit={() => setEditing({ kind: "edit", id: slot.id })}
                           />
                         ),

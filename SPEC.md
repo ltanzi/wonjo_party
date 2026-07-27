@@ -221,12 +221,29 @@ Stop here and get your friend to actually use it. Line-up is the only bespoke sc
 the one you have opinions about — if the design language is wrong, this is when to find
 out, not after it's replicated seven more times.
 
-### Pass 2 — boards + offline + handover
+### Pass 2 — boards + offline + handover ✅ built
 7. Generic board component wired to the seven remaining sections.
 8. Offline read cache + staleness banner.
-9. Provision the remaining eight accounts, hand over.
+9. Provision the remaining eight accounts, hand over. ← still to do
 
-Estimate: 3–4 days of focused work total.
+### What changed during the build
+
+Decisions that were revised in use, and why:
+
+- **Country dropped** from slots entirely. The festival is largely regional; the field
+  was blank or `(GM)` on nearly every row.
+- **Format badges became seven inks** rather than three shared weights, so the shape of
+  a day reads by colour. Held at 85%; below that several pairings fall under 4.5:1.
+- **No margin rules.** The dashed left rule marking unconfirmed slots was removed —
+  muted colour plus the status word already carry it, and a third marker was noise.
+- **Cancelled and done fold away** behind a `N cancelled` / `N done` reveal rather than
+  sitting in the list. Same pattern in both places.
+- **Native popups replaced.** `window.confirm` became an inline two-step; `<select>`
+  became a custom listbox, since a native one hands its dropdown to the OS. Time inputs
+  keep the native picker deliberately — it is the better control on a phone.
+- **Days laid side by side** on desktop, one column each.
+
+Estimate was 3–4 days of focused work; that held.
 
 ## Open items
 

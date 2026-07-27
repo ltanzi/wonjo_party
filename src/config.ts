@@ -82,8 +82,19 @@ export const SECTIONS = [
 /** Booking pipeline for a line-up slot. */
 export const SLOT_STATUS = ["idea", "contacted", "confirmed", "cancelled"] as const;
 
-/** Board item states, for the seven non-line-up sections (pass 2). */
+/**
+ * Board item states, for the seven non-line-up sections. Chips reuse the muted
+ * grey and three of the format inks rather than introducing a second palette,
+ * and are held at the same 85%. All four clear 4.5:1 at 11px.
+ */
 export const ITEM_STATUS = ["todo", "doing", "done", "blocked"] as const;
+
+export const ITEM_STATUS_CHIP: Record<(typeof ITEM_STATUS)[number], string> = {
+  todo: "bg-[#8A8A8A]/85 text-fg",
+  doing: "bg-[#2B5CA8]/85 text-white",
+  done: "bg-[#2E6B4F]/85 text-white",
+  blocked: "bg-[#B82A1B]/85 text-white",
+};
 
 /**
  * Format badges — a solid block of ink per format, so the shape of a day reads

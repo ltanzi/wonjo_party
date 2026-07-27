@@ -25,7 +25,15 @@ const statusStyle: Record<Slot["status"], string> = {
   cancelled: "text-accent",
 };
 
-export function SlotRow({ slot, onEdit }: { slot: Slot; onEdit: () => void }) {
+export function SlotRow({
+  slot,
+  onEdit,
+  disabled,
+}: {
+  slot: Slot;
+  onEdit: () => void;
+  disabled?: boolean;
+}) {
   const unsettled = slot.status === "idea" || slot.status === "contacted";
   const cancelled = slot.status === "cancelled";
   const who = slot.updated_by ? slot.updated_by.split("@")[0] : null;
@@ -33,7 +41,10 @@ export function SlotRow({ slot, onEdit }: { slot: Slot; onEdit: () => void }) {
   return (
     <button
       onClick={onEdit}
-      className={`block w-full pl-2 pr-1 py-1 text-left hover:bg-soft/60 ${statusStyle[slot.status]}`}
+      disabled={disabled}
+      className={`block w-full py-1 pl-2 pr-1 text-left ${
+        disabled ? "cursor-default" : "hover:bg-soft/60"
+      } ${statusStyle[slot.status]}`}
     >
       <div className="grid grid-cols-[4.75rem_1fr] items-baseline gap-2">
         <span className="text-[11px] tabular-nums text-muted">
