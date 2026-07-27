@@ -39,6 +39,18 @@ export function LineupPage() {
     void load();
   };
 
+  // Cancelled slots stay in the data — the note explaining why is the point — but
+  // they're folded out of the timetable so the schedule reads clean. Revealed per
+  // stage, keyed `day|stage`.
+  const [revealed, setRevealed] = useState<ReadonlySet<string>>(new Set());
+  const toggleRevealed = (key: string) =>
+    setRevealed((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+
   const confirmed = slots.filter((s) => s.status === "confirmed").length;
   const active = slots.filter((s) => s.status !== "cancelled").length;
 
@@ -73,9 +85,11 @@ export function LineupPage() {
               <div className="bar mb-3 text-center">{day.label}</div>
 
               {STAGES.map((stage) => {
-                const rows = slots.filter(
-                  (s) => s.day_key === day.key && s.stage_key === stage.key,
-                );
+                const all = slots.filter((s) => s.day_key === day.key && s.stage_key === stage.key);
+                const rows = all.filter((s) => s.status !== "cancelled");
+                const cancelled = all.filter((s) => s.status === "cancelled");
+                const stageKey = `${day.key}|${stage.key}`;
+                const showCancelled = revealed.has(stageKey);
                 const addingHere =
                   editing?.kind === "new" && editing.day === day.key && editing.stage === stage.key;
 
@@ -108,34 +122,62 @@ export function LineupPage() {
                       ),
                     )}
 
-                    {addingHere ? (
+                    {addingHere && (
                       <SlotForm
                         dayKey={day.key}
                         stageKey={stage.key}
                         onDone={done}
                         onCancel={() => setEditing(null)}
                       />
-                    ) : (
-                      <button
-                        onClick={() =>
-                          setEditing({
-                            kind: "new",
-                            day: day.key,
-                            stage: stage.key,
-                          })
-                        }
-                        className="mt-1 pl-2 font-mono text-[11px] uppercase tracking-wider text-muted hover:text-fg"
-                      >
-                        + Add
-                      </button>
                     )}
+
+                    <div className="mt-1 flex items-baseline gap-4 pl-2 font-mono text-[11px] uppercase tracking-wider">
+                      {!addingHere && (
+                        <button
+                          onClick={() =>
+                            setEditing({ kind: "new", day: day.key, stage: stage.key })
+                          }
+                          className="text-muted hover:text-fg"
+                        >
+                          + Add
+                        </button>
+                      )}
+                      {cancelled.length > 0 && (
+                        <button
+                          onClick={() => toggleRevealed(stageKey)}
+                          aria-expanded={showCancelled}
+                          className="text-muted hover:text-fg"
+                        >
+                          {cancelled.length} cancelled {showCancelled ? "▴" : "▾"}
+                        </button>
+                      )}
+                    </div>
+
+                    {showCancelled &&
+                      cancelled.map((slot) =>
+                        editing?.kind === "edit" && editing.id === slot.id ? (
+                          <SlotForm
+                            key={slot.id}
+                            slot={slot}
+                            dayKey={day.key}
+                            stageKey={stage.key}
+                            onDone={done}
+                            onCancel={() => setEditing(null)}
+                          />
+                        ) : (
+                          <SlotRow
+                            key={slot.id}
+                            slot={slot}
+                            onEdit={() => setEditing({ kind: "edit", id: slot.id })}
+                          />
+                        ),
+                      )}
                   </div>
                 );
               })}
             </section>
           ))}
       </div>
-
     </div>
   );
 }

@@ -13,15 +13,22 @@ import { formatRange, relativeTime } from "@/lib/time";
  */
 const ghost = "border-l border-dashed border-fg/30 text-muted";
 
+/**
+ * Deliberately no line-through here. Text decoration set on a block propagates to
+ * its descendants and is painted across the full width of each box — and this
+ * row's children are grid containers, so it rendered as a bar spanning the whole
+ * row instead of a strike through the name. It belongs on the name span.
+ */
 const statusStyle: Record<Slot["status"], string> = {
   confirmed: "border-l border-transparent",
   idea: ghost,
   contacted: ghost,
-  cancelled: "border-l border-dashed border-accent/40 text-accent line-through",
+  cancelled: "border-l border-dashed border-accent/40 text-accent",
 };
 
 export function SlotRow({ slot, onEdit }: { slot: Slot; onEdit: () => void }) {
   const unsettled = slot.status === "idea" || slot.status === "contacted";
+  const cancelled = slot.status === "cancelled";
   const who = slot.updated_by ? slot.updated_by.split("@")[0] : null;
 
   return (
@@ -36,7 +43,7 @@ export function SlotRow({ slot, onEdit }: { slot: Slot; onEdit: () => void }) {
 
         <div className="flex flex-wrap items-baseline gap-x-2">
           <FormatBadge format={slot.format} />
-          <span className="uppercase">
+          <span className={`uppercase ${cancelled ? "line-through" : ""}`}>
             {unsettled && <span className="mr-1 text-muted">?</span>}
             {slot.artist_name || <span className="text-muted">untitled</span>}
             {slot.country && <span className="text-muted"> ({slot.country})</span>}
