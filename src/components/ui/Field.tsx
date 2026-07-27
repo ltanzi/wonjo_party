@@ -1,9 +1,4 @@
-import {
-  forwardRef,
-  InputHTMLAttributes,
-  SelectHTMLAttributes,
-  TextareaHTMLAttributes,
-} from "react";
+import { forwardRef, InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 const base =
   "w-full rounded-none border border-fg/20 bg-transparent px-2 py-1.5 text-fg " +
@@ -24,14 +19,8 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
 );
 Input.displayName = "Input";
 
-export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(
-  ({ className = "", children, ...props }, ref) => (
-    <select ref={ref} className={`${base} ${className}`} {...props}>
-      {children}
-    </select>
-  ),
-);
-Select.displayName = "Select";
+// Select lives in ./Select.tsx — it is a custom listbox, not a native <select>,
+// because the OS renders a native dropdown's list and CSS cannot reach it.
 
 export const Textarea = forwardRef<
   HTMLTextAreaElement,

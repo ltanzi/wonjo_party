@@ -1,11 +1,12 @@
 import { FormEvent, useState } from "react";
-import { FORMATS, SLOT_STATUS } from "@/config";
+import { FORMAT_KEYS, SLOT_STATUS } from "@/config";
 import type { Format, SlotStatus } from "@/config";
 import type { Slot } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
 import { toInputTime } from "@/lib/time";
 import { Button } from "@/components/ui/Button";
-import { Input, Label, Select, Textarea } from "@/components/ui/Field";
+import { Input, Label, Textarea } from "@/components/ui/Field";
+import { Select } from "@/components/ui/Select";
 
 interface Props {
   slot?: Slot; // absent = creating
@@ -28,6 +29,7 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
   const [notes, setNotes] = useState(slot?.notes ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -55,9 +57,10 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
     else onDone();
   }
 
+  // Confirmation is the inline two-step in the button row below, not window.confirm —
+  // a browser dialog is the one popup no CSS can touch.
   async function onDelete() {
     if (!slot) return;
-    if (!confirm(`Delete "${slot.artist_name || "untitled"}"?`)) return;
     setBusy(true);
     const { error } = await supabase.from("slots").delete().eq("id", slot.id);
     setBusy(false);
@@ -89,16 +92,15 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
           <Label>End</Label>
           <Input type="time" value={end} onChange={(e) => setEnd(e.target.value)} />
         </label>
-        <label className="block">
+        <div>
           <Label>Format</Label>
-          <Select value={format} onChange={(e) => setFormat(e.target.value as Format)}>
-            {FORMATS.map((f) => (
-              <option key={f.key} value={f.key}>
-                {f.key}
-              </option>
-            ))}
-          </Select>
-        </label>
+          <Select
+            aria-label="Format"
+            value={format}
+            onChange={(v) => setFormat(v as Format)}
+            options={FORMAT_KEYS}
+          />
+        </div>
         <label className="block">
           <Label>Country</Label>
           <Input
@@ -112,13 +114,12 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
 
       <div className="mb-3">
         <Label>Status</Label>
-        <Select value={status} onChange={(e) => setStatus(e.target.value as SlotStatus)}>
-          {SLOT_STATUS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </Select>
+        <Select
+          aria-label="Status"
+          value={status}
+          onChange={(v) => setStatus(v as SlotStatus)}
+          options={SLOT_STATUS}
+        />
       </div>
 
       <div className="mb-3">
@@ -135,16 +136,37 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
         <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={busy}>
           Cancel
         </Button>
-        {slot && (
-          <button
-            type="button"
-            onClick={onDelete}
-            disabled={busy}
-            className="ml-auto font-mono text-[11px] uppercase tracking-wider text-muted hover:text-accent"
-          >
-            Delete
-          </button>
-        )}
+        {slot &&
+          (confirmingDelete ? (
+            <span className="ml-auto flex items-baseline gap-2 font-mono text-[11px] uppercase tracking-wider">
+              <span className="text-muted">Delete?</span>
+              <button
+                type="button"
+                onClick={onDelete}
+                disabled={busy}
+                className="text-accent underline underline-offset-2 hover:no-underline"
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(false)}
+                disabled={busy}
+                className="text-muted hover:text-fg"
+              >
+                No
+              </button>
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmingDelete(true)}
+              disabled={busy}
+              className="ml-auto font-mono text-[11px] uppercase tracking-wider text-muted hover:text-accent"
+            >
+              Delete
+            </button>
+          ))}
       </div>
     </form>
   );

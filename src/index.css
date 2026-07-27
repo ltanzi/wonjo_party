@@ -42,6 +42,31 @@ button {
   font-size: inherit;
 }
 
+/* Time fields: the clock button is a UA widget, so we can only recolour it.
+   The picker panel it opens is drawn by the OS and is not reachable from CSS —
+   that is deliberate, since the native picker is the better control on a phone. */
+input[type="time"] {
+  color-scheme: light; /* stops dark-mode browsers inverting the field */
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: grayscale(1);
+  opacity: 0.4;
+  cursor: pointer;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Kill the blue focus ring inside the field; the border already signals focus */
+input[type="time"]::-webkit-datetime-edit-hour-field:focus,
+input[type="time"]::-webkit-datetime-edit-minute-field:focus {
+  background: #1a1a1a;
+  color: #ede8e0;
+  outline: none;
+}
+
 @layer components {
   /* The black title bar used for days, stages and section headers */
   .bar {

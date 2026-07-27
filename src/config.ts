@@ -100,6 +100,9 @@ export const FORMATS = [
   { key: "A/V", weight: "accent" },
 ] as const;
 
+/** Stable identity for <Select options>, so the list isn't rebuilt every render. */
+export const FORMAT_KEYS = FORMATS.map((f) => f.key);
+
 export type DayKey = (typeof DAYS)[number]["key"];
 export type StageKey = (typeof STAGES)[number]["key"];
 export type SectionKey = (typeof SECTIONS)[number]["key"];
