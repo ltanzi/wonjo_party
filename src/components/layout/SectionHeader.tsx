@@ -22,8 +22,9 @@ export function SectionHeader({
         {meta}
       </div>
 
-      {/* Held near 65 characters so it reads as prose, not a caption */}
-      <p className="max-w-[62ch] text-muted">{section.blurb}</p>
+      {/* No max-width: blurbs are written short enough to sit on one line at the
+          page's reading width. They still wrap on a phone, which is fine. */}
+      <p className="text-muted">{section.blurb}</p>
 
       <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-muted">
         Kept by{" "}

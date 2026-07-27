@@ -23,6 +23,9 @@ export const STAGES = [
  * `owner` is social, not enforced — anyone may edit anything (decision 4). It just
  * says who keeps this section, so people know whom to ask. Fill in the names;
  * an empty string renders as unassigned.
+ *
+ * Keep `blurb` under ~90 characters. The page is 736px of Inconsolata at 13px,
+ * which is about 113 characters, so anything longer wraps to a second line.
  */
 export const SECTIONS = [
   {
@@ -30,29 +33,25 @@ export const SECTIONS = [
     label: "LINE-UP",
     bespoke: true,
     owner: "Ikram Bouloum",
-    blurb:
-      "Who plays, when, and on which stage. Each booking from first idea through to confirmed.",
+    blurb: "Who plays, when and where — from first idea to confirmed.",
   },
   {
     key: "production",
     label: "PRODUCTION",
     owner: "",
-    blurb:
-      "Stage build, sound, power, gear and suppliers. Everything that has to physically exist before the first act.",
+    blurb: "Stage, sound, power, gear and suppliers. Everything that must physically exist.",
   },
   {
     key: "logistics",
     label: "LOGISTICS",
     owner: "",
-    blurb:
-      "Travel, transport, beds and food. Getting people and things to Dallou, and keeping them there.",
+    blurb: "Travel, transport, beds and food. Getting people and things to Dallou.",
   },
   {
     key: "communication",
     label: "COMMUNICATION",
     owner: "",
-    blurb:
-      "Poster, socials, press and the announcement calendar. Everything the outside world sees.",
+    blurb: "Poster, socials, press and the announcement calendar.",
   },
   {
     key: "compilation",
@@ -64,20 +63,19 @@ export const SECTIONS = [
     key: "budget",
     label: "BUDGET",
     owner: "",
-    blurb: "Money in and money out. Fees, quotes, what is committed and what is still a guess.",
+    blurb: "Money in and money out. Fees, quotes, and what is still a guess.",
   },
   {
     key: "site",
     label: "DALLOU / SITE",
     owner: "",
-    blurb:
-      "The house and the ground it stands on. What is finished, what is needed, what must be ready by January.",
+    blurb: "The house and the ground. What is done, and what must be ready by January.",
   },
   {
     key: "team",
     label: "TEAM",
     owner: "",
-    blurb: "Who is on the crew, what they are responsible for, and how to reach them.",
+    blurb: "Who is on the crew, what they do, and how to reach them.",
   },
 ] as const;
 
