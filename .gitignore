@@ -7,7 +7,13 @@ dist
 .env.local
 .env.*.local
 
-# Never commit real festival data — the repo is public (SPEC.md, decision 6)
+# Never commit real festival data — the repo is public (SPEC.md, decision 6).
+# Spreadsheets and exports are how real names, emails and fees arrive: the
+# artist compilation list in reference/ is exactly that. Blocked repo-wide
+# rather than per-file, because the next one will have a different name.
+*.xlsx
+*.xls
+*.csv
 *.local.json
 /export
 /private

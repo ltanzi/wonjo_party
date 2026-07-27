@@ -56,8 +56,9 @@ export const SECTIONS = [
   {
     key: "compilation",
     label: "COMPILATION",
+    bespoke: true,
     owner: "",
-    blurb: "The record. Tracks, masters, artwork and credits.",
+    blurb: "Artists on the record: who is in, and who has sent their track.",
   },
   {
     key: "budget",

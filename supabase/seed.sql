@@ -52,8 +52,7 @@ values
   ('communication', 'Announce the first names',        'Ikram', 'blocked', 'waiting on the line-up to firm up', null, 1),
   ('communication', 'Instagram account',               'Ikram', 'done',    '', null, 2),
 
-  ('compilation',   'Collect tracks from artists',     null,    'todo',    '', '2026-12-01', 0),
-  ('compilation',   'Mastering',                       null,    'todo',    '', null, 1),
+  -- no 'compilation' rows: that section has its own table and its own page
 
   ('budget',        'Sound system quote',              'Lamin', 'done',    'EUR 1,200 for the weekend', null, 0),
   ('budget',        'Set the artist fee ceiling',      'Ikram', 'doing',   '', null, 1),
