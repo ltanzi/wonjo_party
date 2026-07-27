@@ -201,8 +201,17 @@ Matches the reference. Day bar, then per stage a bar, then rows.
 - On load: render cache immediately, then revalidate in the background.
 - Offline: render cache with a top banner — `OFFLINE · LAST SYNCED 14.20` — and all edit
   controls disabled. No write queue, no conflict resolution.
-- PWA install (service worker + manifest) is a clean later addition; the caching layer
-  being built now is the hard part.
+
+**Known limit — offline survives navigation, not a reload.** There is no service worker,
+so the browser must fetch `index.html` and the JS bundle from the network before any of
+the above runs. With the tab open you can move between pages and read everything; reload,
+a new tab, or a bookmark all give the browser's own error page, and the cache sits there
+unread.
+
+Decided knowingly, twice: the installable-PWA option was declined at decision 13 and again
+after seeing the behaviour. The mitigation is procedural — **keep the tab open on site**.
+The fix, if it ever bites, is `vite-plugin-pwa`: a dev dependency, about seven lines, and
+it also makes the app installable to the home screen.
 
 ## Build sequence
 

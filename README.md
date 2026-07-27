@@ -81,10 +81,15 @@ order, once each. They are all safe to re-run.
 
 ## Offline
 
-Every successful fetch is cached in `localStorage`, so the app renders instantly and
-still reads with no connection. When it can't reach Supabase a red bar appears saying
-when the data was last true, and editing is switched off — there is no write queue and
-no conflict resolution by design (`SPEC.md`, decision 13). Signing out clears the cache.
+Every successful fetch is cached in `localStorage`, so pages render instantly and keep
+reading with no connection. When Supabase can't be reached a red bar appears saying when
+the data was last true, and editing switches off — no write queue, no conflict
+resolution, by design (`SPEC.md`, decision 13). Signing out clears the cache.
+
+> **Keep the tab open on site.** There is no service worker, so offline reading only
+> survives while the app is already loaded. Reloading, opening a new tab or using a
+> bookmark with no connection gives the browser's error page — it has to fetch the app
+> itself before any cache can be read. Deliberate; see the known limit in `SPEC.md`.
 
 ## Commands
 
