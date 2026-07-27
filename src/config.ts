@@ -91,20 +91,24 @@ export const ITEM_STATUS = ["todo", "doing", "done", "blocked"] as const;
  *
  * The inks are chosen to sit on the paper ground like screenprint: desaturated,
  * warm-leaning, none of them competing with the accent red used for errors and
- * cancellations. Every pairing clears 4.5:1 against its text colour, checked at
- * the 11px the badges actually render at.
+ * cancellations. Held at 85% so the paper and its grain show through.
+ *
+ * 85% is the floor, not a taste call. Compositing over #EDE8E0 lightens each ink
+ * and drops its contrast against the label; below 0.85 several pairings fall
+ * under 4.5:1 at the 11px these render at. A/V is a slightly deeper red than the
+ * UI accent for the same reason — at #E63B2E it does not clear AA even opaque.
  *
  * Full class strings, not composed ones — Tailwind scans source text, so
  * `bg-[${hex}]` built at runtime would never be generated.
  */
 export const FORMATS = [
-  { key: "live", badge: "bg-[#1A1A1A] text-bg" }, // black
-  { key: "dj", badge: "bg-[#2B5CA8] text-white" }, // blue
-  { key: "performance", badge: "bg-[#2E6B4F] text-white" }, // green
-  { key: "workshop", badge: "bg-[#B07A1E] text-fg" }, // ochre
-  { key: "talk", badge: "bg-[#6B4C8A] text-white" }, // purple
-  { key: "film", badge: "bg-[#7A4B32] text-white" }, // brown
-  { key: "A/V", badge: "bg-[#C9301F] text-white" }, // red
+  { key: "live", badge: "bg-[#1A1A1A]/85 text-bg" }, // black
+  { key: "dj", badge: "bg-[#2B5CA8]/85 text-white" }, // blue
+  { key: "performance", badge: "bg-[#2E6B4F]/85 text-white" }, // green
+  { key: "workshop", badge: "bg-[#B07A1E]/85 text-fg" }, // ochre
+  { key: "talk", badge: "bg-[#6B4C8A]/85 text-white" }, // purple
+  { key: "film", badge: "bg-[#7A4B32]/85 text-white" }, // brown
+  { key: "A/V", badge: "bg-[#B82A1B]/85 text-white" }, // red
 ] as const;
 
 /** Stable identity for <Select options>, so the list isn't rebuilt every render. */

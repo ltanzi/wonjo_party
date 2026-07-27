@@ -5,30 +5,24 @@ import { formatRange, relativeTime } from "@/lib/time";
 /**
  * Row treatment by booking status (SPEC.md):
  *   confirmed  — solid, exactly like the reference timetable
- *   idea/contacted — ghosted: dashed rule and muted text, so a day's real
- *     content reads at a glance; the status word says which stage it is at
+ *   idea/contacted — muted text, so a day's real content reads at a glance;
+ *     the status word after the name says which stage it is at
  *   cancelled  — struck through in accent red, and hidden behind the
  *     per-stage reveal on the line-up page
  *
- * The dashed rule and the grey are the scannable signal; the word is the
- * precise one. There is deliberately no third marker duplicating them.
+ * No rules or markers in the margin: the colour is the scannable signal and the
+ * word is the precise one, which between them cover it.
  *
- * Confirmed rows keep a transparent left border so nothing shifts
- * horizontally when a slot is confirmed.
- */
-const ghost = "border-l border-dashed border-fg/30 text-muted";
-
-/**
- * Deliberately no line-through here. Text decoration set on a block propagates to
- * its descendants and is painted across the full width of each box — and this
- * row's children are grid containers, so it rendered as a bar spanning the whole
- * row instead of a strike through the name. It belongs on the name span.
+ * Note the strike is not set here. Text decoration on a block propagates to its
+ * descendants and paints across the full width of each box — and this row's
+ * children are grid containers, so it rendered as a bar spanning the whole row.
+ * It belongs on the name span.
  */
 const statusStyle: Record<Slot["status"], string> = {
-  confirmed: "border-l border-transparent",
-  idea: ghost,
-  contacted: ghost,
-  cancelled: "border-l border-dashed border-accent/40 text-accent",
+  confirmed: "",
+  idea: "text-muted",
+  contacted: "text-muted",
+  cancelled: "text-accent",
 };
 
 export function SlotRow({ slot, onEdit }: { slot: Slot; onEdit: () => void }) {
