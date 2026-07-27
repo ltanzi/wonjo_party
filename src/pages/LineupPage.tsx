@@ -43,7 +43,8 @@ export function LineupPage() {
   const active = slots.filter((s) => s.status !== "cancelled").length;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    // Widens at lg so the three day columns have room; narrower pages stay at 3xl
+    <div className="mx-auto max-w-3xl px-4 py-6 lg:max-w-6xl">
       <Header back />
 
       <SectionHeader
@@ -61,69 +62,82 @@ export function LineupPage() {
       {loading && <p className="font-mono text-[11px] uppercase tracking-wider text-muted">…</p>}
       {error && <p className="font-mono text-[11px] text-accent">{error}</p>}
 
-      {!loading &&
-        !error &&
-        DAYS.map((day) => (
-          <section key={day.key} className="mb-8">
-            <div className="bar mb-3 text-center">{day.label}</div>
+      {/* One column per day side by side on desktop; stacked below lg. Stage bars
+          deliberately don't align across columns — each day reads as its own unit,
+          the way a printed timetable sets them. */}
+      <div className="grid gap-x-6 gap-y-8 lg:grid-cols-3">
+        {!loading &&
+          !error &&
+          DAYS.map((day) => (
+            <section key={day.key}>
+              <div className="bar mb-3 text-center">{day.label}</div>
 
-            {STAGES.map((stage) => {
-              const rows = slots.filter((s) => s.day_key === day.key && s.stage_key === stage.key);
-              const addingHere =
-                editing?.kind === "new" && editing.day === day.key && editing.stage === stage.key;
+              {STAGES.map((stage) => {
+                const rows = slots.filter(
+                  (s) => s.day_key === day.key && s.stage_key === stage.key,
+                );
+                const addingHere =
+                  editing?.kind === "new" && editing.day === day.key && editing.stage === stage.key;
 
-              return (
-                <div key={stage.key} className="mb-5">
-                  <div className="bar mb-1">{stage.label}</div>
+                return (
+                  <div key={stage.key} className="mb-5">
+                    <div className="bar mb-1">{stage.label}</div>
 
-                  {rows.length === 0 && !addingHere && (
-                    <p className="py-1 pl-2 text-[11px] uppercase tracking-wider text-muted">
-                      Nothing programmed
-                    </p>
-                  )}
+                    {rows.length === 0 && !addingHere && (
+                      <p className="py-1 pl-2 text-[11px] uppercase tracking-wider text-muted">
+                        Nothing programmed
+                      </p>
+                    )}
 
-                  {rows.map((slot) =>
-                    editing?.kind === "edit" && editing.id === slot.id ? (
+                    {rows.map((slot) =>
+                      editing?.kind === "edit" && editing.id === slot.id ? (
+                        <SlotForm
+                          key={slot.id}
+                          slot={slot}
+                          dayKey={day.key}
+                          stageKey={stage.key}
+                          onDone={done}
+                          onCancel={() => setEditing(null)}
+                        />
+                      ) : (
+                        <SlotRow
+                          key={slot.id}
+                          slot={slot}
+                          onEdit={() => setEditing({ kind: "edit", id: slot.id })}
+                        />
+                      ),
+                    )}
+
+                    {addingHere ? (
                       <SlotForm
-                        key={slot.id}
-                        slot={slot}
                         dayKey={day.key}
                         stageKey={stage.key}
                         onDone={done}
                         onCancel={() => setEditing(null)}
                       />
                     ) : (
-                      <SlotRow
-                        key={slot.id}
-                        slot={slot}
-                        onEdit={() => setEditing({ kind: "edit", id: slot.id })}
-                      />
-                    ),
-                  )}
-
-                  {addingHere ? (
-                    <SlotForm
-                      dayKey={day.key}
-                      stageKey={stage.key}
-                      onDone={done}
-                      onCancel={() => setEditing(null)}
-                    />
-                  ) : (
-                    <button
-                      onClick={() => setEditing({ kind: "new", day: day.key, stage: stage.key })}
-                      className="mt-1 pl-2 font-mono text-[11px] uppercase tracking-wider text-muted hover:text-fg"
-                    >
-                      + Add
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </section>
-        ))}
+                      <button
+                        onClick={() =>
+                          setEditing({
+                            kind: "new",
+                            day: day.key,
+                            stage: stage.key,
+                          })
+                        }
+                        className="mt-1 pl-2 font-mono text-[11px] uppercase tracking-wider text-muted hover:text-fg"
+                      >
+                        + Add
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </section>
+          ))}
+      </div>
 
       {!loading && !error && (
-        <p className="border-t border-fg/15 pt-3 font-mono text-[11px] uppercase tracking-wider text-muted">
+        <p className="mt-8 border-t border-fg/15 pt-3 font-mono text-[11px] uppercase tracking-wider text-muted">
           {SLOT_STATUS.join(" → ")}
         </p>
       )}

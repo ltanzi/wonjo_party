@@ -69,10 +69,18 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
     <form onSubmit={onSubmit} className="border-l border-fg/40 bg-soft/40 py-3 pl-3 pr-2">
       <div className="mb-3">
         <Label>Name</Label>
-        <Input value={artistName} onChange={(e) => setArtistName(e.target.value)} autoFocus required />
+        <Input
+          value={artistName}
+          onChange={(e) => setArtistName(e.target.value)}
+          autoFocus
+          required
+        />
       </div>
 
-      <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      {/* Fixed at two columns: Tailwind breakpoints track the viewport, not the
+          container, so sm:grid-cols-4 would cram four fields into a ~380px day
+          column on desktop. Two columns fit everywhere this form appears. */}
+      <div className="mb-3 grid grid-cols-2 gap-2">
         <label className="block">
           <Label>Start</Label>
           <Input type="time" value={start} onChange={(e) => setStart(e.target.value)} />

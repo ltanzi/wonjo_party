@@ -12,7 +12,9 @@ const weights = {
 
 export function FormatBadge({ format }: { format: string }) {
   return (
-    <span className={`inline-block font-mono text-[11px] leading-tight ${weights[formatWeight(format)]}`}>
+    <span
+      className={`inline-block font-mono text-[11px] leading-tight ${weights[formatWeight(format)]}`}
+    >
       {format}
     </span>
   );

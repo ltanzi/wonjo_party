@@ -1,4 +1,9 @@
-import { forwardRef, InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import {
+  forwardRef,
+  InputHTMLAttributes,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from "react";
 
 const base =
   "w-full rounded-none border border-fg/20 bg-transparent px-2 py-1.5 text-fg " +
@@ -28,9 +33,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
 );
 Select.displayName = "Select";
 
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(
-  ({ className = "", ...props }, ref) => (
-    <textarea ref={ref} className={`${base} ${className}`} {...props} />
-  ),
-);
+export const Textarea = forwardRef<
+  HTMLTextAreaElement,
+  TextareaHTMLAttributes<HTMLTextAreaElement>
+>(({ className = "", ...props }, ref) => (
+  <textarea ref={ref} className={`${base} ${className}`} {...props} />
+));
 Textarea.displayName = "Textarea";

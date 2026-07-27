@@ -29,26 +29,30 @@ export const SECTIONS = [
     key: "lineup",
     label: "LINE-UP",
     bespoke: true,
-    owner: "",
-    blurb: "Who plays, when, and on which stage. Each booking from first idea through to confirmed.",
+    owner: "Ikram Bouloum",
+    blurb:
+      "Who plays, when, and on which stage. Each booking from first idea through to confirmed.",
   },
   {
     key: "production",
     label: "PRODUCTION",
     owner: "",
-    blurb: "Stage build, sound, power, gear and suppliers. Everything that has to physically exist before the first act.",
+    blurb:
+      "Stage build, sound, power, gear and suppliers. Everything that has to physically exist before the first act.",
   },
   {
     key: "logistics",
     label: "LOGISTICS",
     owner: "",
-    blurb: "Travel, transport, beds and food. Getting people and things to Dallou, and keeping them there.",
+    blurb:
+      "Travel, transport, beds and food. Getting people and things to Dallou, and keeping them there.",
   },
   {
     key: "communication",
     label: "COMMUNICATION",
     owner: "",
-    blurb: "Poster, socials, press and the announcement calendar. Everything the outside world sees.",
+    blurb:
+      "Poster, socials, press and the announcement calendar. Everything the outside world sees.",
   },
   {
     key: "compilation",
@@ -66,7 +70,8 @@ export const SECTIONS = [
     key: "site",
     label: "DALLOU / SITE",
     owner: "",
-    blurb: "The house and the ground it stands on. What is finished, what is needed, what must be ready by January.",
+    blurb:
+      "The house and the ground it stands on. What is finished, what is needed, what must be ready by January.",
   },
   {
     key: "team",
