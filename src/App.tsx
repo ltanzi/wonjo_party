@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/auth/AuthProvider";
 import { LoginPage } from "@/auth/LoginPage";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
@@ -6,6 +6,18 @@ import { HomePage } from "@/pages/HomePage";
 import { LineupPage } from "@/pages/LineupPage";
 import { CompilationPage } from "@/pages/CompilationPage";
 import { BoardPage } from "@/pages/BoardPage";
+
+/**
+ * Keyed by section so a param change is a remount. React Router reuses the
+ * component instance when only the param changes, which would leave the
+ * previous section's rows on screen under the new heading — and offline, with
+ * no fetch to correct it, indefinitely. Unreachable through the current UI
+ * (every board-to-board move goes via Home), but one nav link away.
+ */
+function BoardRoute() {
+  const { sectionKey } = useParams();
+  return <BoardPage key={sectionKey} />;
+}
 
 function Gate() {
   const { session, loading } = useAuth();
@@ -28,7 +40,7 @@ function Gate() {
         {/* Bespoke sections before the generic board */}
         <Route path="/lineup" element={<LineupPage />} />
         <Route path="/compilation" element={<CompilationPage />} />
-        <Route path="/:sectionKey" element={<BoardPage />} />
+        <Route path="/:sectionKey" element={<BoardRoute />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

@@ -19,7 +19,10 @@ export function LineupPage() {
         .from("slots")
         .select("*")
         .order("start_time", { ascending: true, nullsFirst: false })
-        .order("sort_order", { ascending: true }),
+        .order("sort_order", { ascending: true })
+        // Final tiebreak: rows sharing a sort_order would otherwise come back
+        // in whatever order Postgres felt like, reshuffling between loads.
+        .order("id", { ascending: true }),
     [],
   );
 
@@ -85,6 +88,10 @@ export function LineupPage() {
                 const cancelled = all.filter((s) => s.status === "cancelled");
                 const stageKey = `${day.key}|${stage.key}`;
                 const showCancelled = revealed.has(stageKey);
+                // Append after the last row in this stage rather than tying at 0
+                const nextSortOrder = all.length
+                  ? Math.max(...all.map((s) => s.sort_order)) + 1
+                  : 0;
                 const addingHere =
                   editing?.kind === "new" && editing.day === day.key && editing.stage === stage.key;
 
@@ -105,6 +112,7 @@ export function LineupPage() {
                           slot={slot}
                           dayKey={day.key}
                           stageKey={stage.key}
+                          nextSortOrder={nextSortOrder}
                           onDone={done}
                           onCancel={() => setEditing(null)}
                         />
@@ -122,6 +130,7 @@ export function LineupPage() {
                       <SlotForm
                         dayKey={day.key}
                         stageKey={stage.key}
+                        nextSortOrder={nextSortOrder}
                         onDone={done}
                         onCancel={() => setEditing(null)}
                       />
@@ -157,6 +166,7 @@ export function LineupPage() {
                             slot={slot}
                             dayKey={day.key}
                             stageKey={stage.key}
+                            nextSortOrder={nextSortOrder}
                             onDone={done}
                             onCancel={() => setEditing(null)}
                           />

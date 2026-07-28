@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { readCache, writeCache } from "./cache";
+import { registerRetry, reportSynced } from "./sync";
 import { reportOffline, reportOnline } from "./useOnline";
 
 interface Result<T> {
@@ -30,23 +31,46 @@ export function useTable<T>(cacheKey: string, fetcher: () => PromiseLike<Result<
   const [loading, setLoading] = useState(!cached);
   const [error, setError] = useState<string | null>(null);
 
+  // Responses can arrive out of order — a slow request issued before an edit
+  // can land after the reload that followed it, reverting the screen AND
+  // overwriting the cache with pre-edit data. Only the newest request may write.
+  const latest = useRef(0);
+  // Compared against the live response to spot a suspicious empty result
+  const rowCount = useRef(cached?.data?.length ?? 0);
+
   const load = useCallback(async () => {
+    const id = ++latest.current;
+
     let result: Result<T>;
     try {
       result = await fetcher();
     } catch (e) {
       // A throw from the fetcher is a bug in our own code, not a network
       // condition — supabase-js resolves transport failures into `error`.
+      if (id !== latest.current) return;
       setError(e instanceof Error ? e.message : "Could not load");
       setLoading(false);
       return;
     }
 
+    if (id !== latest.current) return; // superseded
+
     const { data, error, status } = result;
 
     if (!error) {
-      setRows(data ?? []);
-      writeCache(cacheKey, data ?? []);
+      const next = data ?? [];
+
+      // An unauthenticated read returns 200 [] rather than an error, because RLS
+      // filters rather than refusing. Treating that as truth would wipe the only
+      // offline copy at the moment it is most needed. So the rows update — the
+      // screen should not lie — but the cache is left alone. The cost is that a
+      // genuinely emptied table keeps a stale cache until something is added
+      // back; that is much the cheaper mistake.
+      const suspiciousEmpty = next.length === 0 && rowCount.current > 0;
+
+      setRows(next);
+      rowCount.current = next.length;
+      if (!suspiciousEmpty) reportSynced(writeCache(cacheKey, next));
       setError(null);
       reportOnline();
     } else if (status === 0) {
@@ -68,6 +92,21 @@ export function useTable<T>(cacheKey: string, fetcher: () => PromiseLike<Result<
 
   useEffect(() => {
     void load();
+  }, [load]);
+
+  // Tell the banner when *this* table was last true, and give it something to
+  // retry with, so a latched offline state isn't a dead end.
+  useEffect(() => {
+    reportSynced(readCache<T[]>(cacheKey)?.at ?? null);
+    registerRetry(() => void load());
+    return () => registerRetry(null);
+  }, [cacheKey, load]);
+
+  // Connectivity coming back should refresh without the user doing anything.
+  useEffect(() => {
+    const onBack = () => void load();
+    window.addEventListener("online", onBack);
+    return () => window.removeEventListener("online", onBack);
   }, [load]);
 
   return { rows, loading, error, reload: load };

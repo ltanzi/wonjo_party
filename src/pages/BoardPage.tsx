@@ -26,7 +26,8 @@ export function BoardPage() {
         .from("items")
         .select("*")
         .eq("section_key", key)
-        .order("sort_order", { ascending: true }),
+        .order("sort_order", { ascending: true })
+        .order("id", { ascending: true }), // deterministic tiebreak (see LineupPage)
     [key],
   );
 
@@ -45,6 +46,9 @@ export function BoardPage() {
   // Stale rows still render alongside the error (see LineupPage)
   const showContent = !loading && (rows.length > 0 || !error);
 
+  // Append after the last row rather than tying at 0
+  const nextSortOrder = rows.length ? Math.max(...rows.map((i) => i.sort_order)) + 1 : 0;
+
   // Completed work folds away, the same as cancelled slots on the line-up
   const open = rows.filter((i) => i.status !== "done");
   const finished = rows.filter((i) => i.status === "done");
@@ -55,6 +59,7 @@ export function BoardPage() {
         key={item.id}
         item={item}
         sectionKey={section.key}
+        nextSortOrder={nextSortOrder}
         onDone={done}
         onCancel={() => setEditing(null)}
       />
@@ -97,7 +102,12 @@ export function BoardPage() {
           {open.map(renderRow)}
 
           {editing?.kind === "new" && (
-            <ItemForm sectionKey={section.key} onDone={done} onCancel={() => setEditing(null)} />
+            <ItemForm
+              sectionKey={section.key}
+              nextSortOrder={nextSortOrder}
+              onDone={done}
+              onCancel={() => setEditing(null)}
+            />
           )}
 
           <div className="mt-2 flex items-baseline gap-4 px-1 font-mono text-[11px] uppercase tracking-wider">

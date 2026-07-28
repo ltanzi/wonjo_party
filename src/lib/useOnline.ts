@@ -27,6 +27,16 @@ export function reportOnline() {
   }
 }
 
+/**
+ * Mutations must move the flag too. Reads were the only thing reporting, so
+ * losing signal while editing left the banner down and every control enabled —
+ * and editing is precisely what offline mode exists to block.
+ */
+export function reportFromStatus(status?: number) {
+  if (status === 0) reportOffline();
+  else if (status !== undefined) reportOnline();
+}
+
 export function useOnline() {
   const [online, setOnline] = useState(isOnline);
 

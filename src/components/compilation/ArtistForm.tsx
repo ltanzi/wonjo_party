@@ -1,16 +1,19 @@
 import { FormEvent, useState } from "react";
 import type { CompilationArtist } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
+import { reportFromStatus } from "@/lib/useOnline";
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Field";
 
 interface Props {
   artist?: CompilationArtist; // absent = creating
+  /** Next free position; nothing set it before, so rows all tied at 0. */
+  nextSortOrder: number;
   onDone: () => void;
   onCancel: () => void;
 }
 
-export function ArtistForm({ artist, onDone, onCancel }: Props) {
+export function ArtistForm({ artist, nextSortOrder, onDone, onCancel }: Props) {
   const [name, setName] = useState(artist?.artist ?? "");
   const [email, setEmail] = useState(artist?.email ?? "");
   const [busy, setBusy] = useState(false);
@@ -24,10 +27,11 @@ export function ArtistForm({ artist, onDone, onCancel }: Props) {
 
     // confirmed / sent are toggled straight from the row, not set here
     const payload = { artist: name.trim(), email: email.trim() };
-    const { error } = artist
+    const { error, status } = artist
       ? await supabase.from("compilation").update(payload).eq("id", artist.id)
-      : await supabase.from("compilation").insert(payload);
+      : await supabase.from("compilation").insert({ ...payload, sort_order: nextSortOrder });
 
+    reportFromStatus(status);
     setBusy(false);
     if (error) setError(error.message);
     else onDone();
@@ -36,7 +40,8 @@ export function ArtistForm({ artist, onDone, onCancel }: Props) {
   async function onDelete() {
     if (!artist) return;
     setBusy(true);
-    const { error } = await supabase.from("compilation").delete().eq("id", artist.id);
+    const { error, status } = await supabase.from("compilation").delete().eq("id", artist.id);
+    reportFromStatus(status);
     setBusy(false);
     if (error) setError(error.message);
     else onDone();

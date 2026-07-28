@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { CompilationArtist } from "@/lib/types";
 import { useTable } from "@/lib/useTable";
-import { useOnline } from "@/lib/useOnline";
+import { reportFromStatus, useOnline } from "@/lib/useOnline";
 import { relativeTime } from "@/lib/time";
 import { Header } from "@/components/layout/Header";
 import { SectionHeader } from "@/components/layout/SectionHeader";
@@ -53,7 +53,12 @@ function Flag({
 
 export function CompilationPage() {
   const fetcher = useCallback(
-    () => supabase.from("compilation").select("*").order("sort_order", { ascending: true }),
+    () =>
+      supabase
+        .from("compilation")
+        .select("*")
+        .order("sort_order", { ascending: true })
+        .order("id", { ascending: true }), // deterministic tiebreak (see LineupPage)
     [],
   );
 
@@ -80,11 +85,12 @@ export function CompilationPage() {
     setPendingFlag(`${row.id}:${field}`);
     setFlagError(null);
 
-    const { error } = await supabase
+    const { error, status } = await supabase
       .from("compilation")
       .update({ [field]: !row[field] })
       .eq("id", row.id);
 
+    reportFromStatus(status);
     setPendingFlag(null);
     if (error) setFlagError(`Could not update ${row.artist || "this row"} · ${error.message}`);
     else await reload();
@@ -92,6 +98,8 @@ export function CompilationPage() {
 
   // Stale rows still render alongside the error (see LineupPage)
   const showContent = !loading && (rows.length > 0 || !error);
+
+  const nextSortOrder = rows.length ? Math.max(...rows.map((r) => r.sort_order)) + 1 : 0;
 
   const sent = rows.filter((r) => r.sent).length;
   const confirmed = rows.filter((r) => r.confirmed).length;
@@ -138,6 +146,7 @@ export function CompilationPage() {
                   <ArtistForm
                     key={row.id}
                     artist={row}
+                    nextSortOrder={nextSortOrder}
                     onDone={done}
                     onCancel={() => setEditing(null)}
                   />
@@ -183,7 +192,13 @@ export function CompilationPage() {
             </div>
           </div>
 
-          {editing === "new" && <ArtistForm onDone={done} onCancel={() => setEditing(null)} />}
+          {editing === "new" && (
+            <ArtistForm
+              nextSortOrder={nextSortOrder}
+              onDone={done}
+              onCancel={() => setEditing(null)}
+            />
+          )}
 
           {online && editing !== "new" && (
             <button

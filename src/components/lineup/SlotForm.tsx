@@ -3,6 +3,7 @@ import { FORMAT_KEYS, SLOT_STATUS } from "@/config";
 import type { Format, SlotStatus } from "@/config";
 import type { Slot } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
+import { reportFromStatus } from "@/lib/useOnline";
 import { toInputTime } from "@/lib/time";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Textarea } from "@/components/ui/Field";
@@ -12,6 +13,8 @@ interface Props {
   slot?: Slot; // absent = creating
   dayKey: string;
   stageKey: string;
+  /** Next free position in this stage; nothing set it before, so rows all tied at 0. */
+  nextSortOrder: number;
   onDone: () => void;
   onCancel: () => void;
 }
@@ -19,7 +22,7 @@ interface Props {
 /** Empty time inputs must become SQL NULL, not '' — Postgres `time` rejects ''. */
 const orNull = (v: string) => (v.trim() === "" ? null : v.trim());
 
-export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
+export function SlotForm({ slot, dayKey, stageKey, nextSortOrder, onDone, onCancel }: Props) {
   const [artistName, setArtistName] = useState(slot?.artist_name ?? "");
   const [start, setStart] = useState(toInputTime(slot?.start_time ?? null));
   const [end, setEnd] = useState(toInputTime(slot?.end_time ?? null));
@@ -46,10 +49,11 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
       notes: notes.trim(),
     };
 
-    const { error } = slot
+    const { error, status: httpStatus } = slot
       ? await supabase.from("slots").update(payload).eq("id", slot.id)
-      : await supabase.from("slots").insert(payload);
+      : await supabase.from("slots").insert({ ...payload, sort_order: nextSortOrder });
 
+    reportFromStatus(httpStatus);
     setBusy(false);
     if (error) setError(error.message);
     else onDone();
@@ -60,7 +64,8 @@ export function SlotForm({ slot, dayKey, stageKey, onDone, onCancel }: Props) {
   async function onDelete() {
     if (!slot) return;
     setBusy(true);
-    const { error } = await supabase.from("slots").delete().eq("id", slot.id);
+    const { error, status: httpStatus } = await supabase.from("slots").delete().eq("id", slot.id);
+    reportFromStatus(httpStatus);
     setBusy(false);
     if (error) setError(error.message);
     else onDone();

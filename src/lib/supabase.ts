@@ -16,4 +16,20 @@ if (!url || !anonKey) {
 
 export const supabase = createClient(url, anonKey, {
   auth: { persistSession: true, autoRefreshToken: true },
+  global: {
+    /**
+     * A stalled connection — the characteristic rural-mobile failure, as opposed
+     * to a clean rejection — leaves fetch neither resolving nor rejecting. With
+     * no timeout the spinner runs forever and no error path is ever reached.
+     * Aborting turns that into an ordinary transport failure, which surfaces as
+     * status 0 and raises the offline banner.
+     *
+     * Only applied when nothing upstream set a signal, so supabase's own
+     * cancellation still wins where it uses one.
+     */
+    fetch: (input, init) =>
+      init?.signal
+        ? fetch(input, init)
+        : fetch(input, { ...init, signal: AbortSignal.timeout(20_000) }),
+  },
 });

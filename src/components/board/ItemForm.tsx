@@ -3,6 +3,7 @@ import { ITEM_STATUS } from "@/config";
 import type { ItemStatus } from "@/config";
 import type { Item } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
+import { reportFromStatus } from "@/lib/useOnline";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Textarea } from "@/components/ui/Field";
 import { Select } from "@/components/ui/Select";
@@ -10,6 +11,8 @@ import { Select } from "@/components/ui/Select";
 interface Props {
   item?: Item; // absent = creating
   sectionKey: string;
+  /** Next free position in this section; nothing set it before, so rows all tied at 0. */
+  nextSortOrder: number;
   onDone: () => void;
   onCancel: () => void;
 }
@@ -17,7 +20,7 @@ interface Props {
 /** Empty date inputs must become SQL NULL, not '' — Postgres `date` rejects ''. */
 const orNull = (v: string) => (v.trim() === "" ? null : v.trim());
 
-export function ItemForm({ item, sectionKey, onDone, onCancel }: Props) {
+export function ItemForm({ item, sectionKey, nextSortOrder, onDone, onCancel }: Props) {
   const [title, setTitle] = useState(item?.title ?? "");
   const [owner, setOwner] = useState(item?.owner ?? "");
   const [status, setStatus] = useState<ItemStatus>(item?.status ?? "todo");
@@ -41,10 +44,11 @@ export function ItemForm({ item, sectionKey, onDone, onCancel }: Props) {
       notes: notes.trim(),
     };
 
-    const { error } = item
+    const { error, status: httpStatus } = item
       ? await supabase.from("items").update(payload).eq("id", item.id)
-      : await supabase.from("items").insert(payload);
+      : await supabase.from("items").insert({ ...payload, sort_order: nextSortOrder });
 
+    reportFromStatus(httpStatus);
     setBusy(false);
     if (error) setError(error.message);
     else onDone();
@@ -53,7 +57,8 @@ export function ItemForm({ item, sectionKey, onDone, onCancel }: Props) {
   async function onDelete() {
     if (!item) return;
     setBusy(true);
-    const { error } = await supabase.from("items").delete().eq("id", item.id);
+    const { error, status: httpStatus } = await supabase.from("items").delete().eq("id", item.id);
+    reportFromStatus(httpStatus);
     setBusy(false);
     if (error) setError(error.message);
     else onDone();
