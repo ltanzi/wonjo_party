@@ -7,6 +7,7 @@ import { useTable } from "@/lib/useTable";
 import { useOnline } from "@/lib/useOnline";
 import { Header } from "@/components/layout/Header";
 import { SectionHeader } from "@/components/layout/SectionHeader";
+import { LoadError } from "@/components/layout/LoadError";
 import { ItemRow } from "@/components/board/ItemRow";
 import { ItemForm } from "@/components/board/ItemForm";
 
@@ -41,6 +42,9 @@ export function BoardPage() {
     void reload();
   };
 
+  // Stale rows still render alongside the error (see LineupPage)
+  const showContent = !loading && (rows.length > 0 || !error);
+
   // Completed work folds away, the same as cancelled slots on the line-up
   const open = rows.filter((i) => i.status !== "done");
   const finished = rows.filter((i) => i.status === "done");
@@ -70,8 +74,7 @@ export function BoardPage() {
       <SectionHeader
         sectionKey={section.key}
         meta={
-          !loading &&
-          !error &&
+          showContent &&
           rows.length > 0 && (
             <span className="whitespace-nowrap font-mono text-[11px] uppercase tracking-wider text-muted">
               {finished.length}/{rows.length} done
@@ -81,9 +84,9 @@ export function BoardPage() {
       />
 
       {loading && <p className="font-mono text-[11px] uppercase tracking-wider text-muted">…</p>}
-      {error && <p className="font-mono text-[11px] text-accent">{error}</p>}
+      {error && <LoadError message={error} stale={rows.length > 0} />}
 
-      {!loading && !error && (
+      {showContent && (
         <>
           {open.length === 0 && editing?.kind !== "new" && (
             <p className="py-1 text-[11px] uppercase tracking-wider text-muted">

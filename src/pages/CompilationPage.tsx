@@ -6,6 +6,7 @@ import { useOnline } from "@/lib/useOnline";
 import { relativeTime } from "@/lib/time";
 import { Header } from "@/components/layout/Header";
 import { SectionHeader } from "@/components/layout/SectionHeader";
+import { LoadError } from "@/components/layout/LoadError";
 import { ArtistForm } from "@/components/compilation/ArtistForm";
 
 /**
@@ -26,23 +27,26 @@ function Flag({
   label,
   onToggle,
   disabled,
+  pending,
 }: {
   on: boolean;
   label: string;
   onToggle: () => void;
   disabled?: boolean;
+  pending?: boolean;
 }) {
   return (
     <button
       onClick={onToggle}
-      disabled={disabled}
+      disabled={disabled || pending}
       aria-pressed={on}
+      aria-busy={pending}
       aria-label={`${label}: ${on ? "yes" : "no"}`}
       className={`inline-block px-1 font-mono text-[11px] leading-tight ${
         on ? "bg-[#2E6B4F]/85 text-white" : "bg-[#8A8A8A]/85 text-fg"
-      } ${disabled ? "cursor-default" : "hover:opacity-80"}`}
+      } ${pending ? "opacity-50" : ""} ${disabled ? "cursor-default" : "hover:opacity-80"}`}
     >
-      {on ? "yes" : "no"}
+      {pending ? "…" : on ? "yes" : "no"}
     </button>
   );
 }
@@ -62,13 +66,32 @@ export function CompilationPage() {
     void reload();
   };
 
+  const [pendingFlag, setPendingFlag] = useState<string | null>(null);
+  const [flagError, setFlagError] = useState<string | null>(null);
+
+  /**
+   * One flag at a time, and never silently. The new value is derived from `row`,
+   * which only changes after a successful reload — so concurrent toggles would
+   * all compute from the same stale row, and a discarded error would leave the
+   * user tapping a cell that never moves.
+   */
   async function toggle(row: CompilationArtist, field: "confirmed" | "sent") {
-    await supabase
+    if (pendingFlag) return;
+    setPendingFlag(`${row.id}:${field}`);
+    setFlagError(null);
+
+    const { error } = await supabase
       .from("compilation")
       .update({ [field]: !row[field] })
       .eq("id", row.id);
-    void reload();
+
+    setPendingFlag(null);
+    if (error) setFlagError(`Could not update ${row.artist || "this row"} · ${error.message}`);
+    else await reload();
   }
+
+  // Stale rows still render alongside the error (see LineupPage)
+  const showContent = !loading && (rows.length > 0 || !error);
 
   const sent = rows.filter((r) => r.sent).length;
   const confirmed = rows.filter((r) => r.confirmed).length;
@@ -80,8 +103,7 @@ export function CompilationPage() {
       <SectionHeader
         sectionKey="compilation"
         meta={
-          !loading &&
-          !error &&
+          showContent &&
           rows.length > 0 && (
             <span className="whitespace-nowrap font-mono text-[11px] uppercase tracking-wider text-muted">
               {sent}/{confirmed} tracks in
@@ -91,9 +113,10 @@ export function CompilationPage() {
       />
 
       {loading && <p className="font-mono text-[11px] uppercase tracking-wider text-muted">…</p>}
-      {error && <p className="font-mono text-[11px] text-accent">{error}</p>}
+      {error && <LoadError message={error} stale={rows.length > 0} />}
+      {flagError && <p className="mb-3 font-mono text-[11px] text-accent">{flagError}</p>}
 
-      {!loading && !error && (
+      {showContent && (
         <>
           <div className="overflow-x-auto">
             <div className="min-w-[30rem]">
@@ -138,12 +161,14 @@ export function CompilationPage() {
                       on={row.confirmed}
                       label="Confirmed"
                       disabled={!online}
+                      pending={pendingFlag === `${row.id}:confirmed`}
                       onToggle={() => void toggle(row, "confirmed")}
                     />
                     <Flag
                       on={row.sent}
                       label="Sent"
                       disabled={!online}
+                      pending={pendingFlag === `${row.id}:sent`}
                       onToggle={() => void toggle(row, "sent")}
                     />
 

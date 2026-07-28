@@ -38,9 +38,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: error?.message ?? null };
     },
     signOut: async () => {
-      // The offline cache holds crew data — don't leave it on a shared laptop
-      clearCache();
+      // Sign out first, clear second. auth-js drops the local session even when
+      // the server call errors, so the cache must go either way — but doing it
+      // in this order means a throw can't destroy the offline copy while
+      // leaving the user signed in.
       await supabase.auth.signOut();
+      // The cache holds crew data; don't leave it on a shared laptop.
+      clearCache();
     },
   };
 

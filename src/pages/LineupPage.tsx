@@ -6,6 +6,7 @@ import { useTable } from "@/lib/useTable";
 import { useOnline } from "@/lib/useOnline";
 import { Header } from "@/components/layout/Header";
 import { SectionHeader } from "@/components/layout/SectionHeader";
+import { LoadError } from "@/components/layout/LoadError";
 import { SlotRow } from "@/components/lineup/SlotRow";
 import { SlotForm } from "@/components/lineup/SlotForm";
 
@@ -43,6 +44,10 @@ export function LineupPage() {
       return next;
     });
 
+  // Stale rows still render alongside the error — blanking a working page
+  // because a refresh failed is worse than showing data that may be old.
+  const showContent = !loading && (slots.length > 0 || !error);
+
   const confirmed = slots.filter((s) => s.status === "confirmed").length;
   const active = slots.filter((s) => s.status !== "cancelled").length;
 
@@ -54,8 +59,7 @@ export function LineupPage() {
       <SectionHeader
         sectionKey="lineup"
         meta={
-          !loading &&
-          !error && (
+          showContent && (
             <span className="whitespace-nowrap font-mono text-[11px] uppercase tracking-wider text-muted">
               {confirmed}/{active} confirmed
             </span>
@@ -64,14 +68,13 @@ export function LineupPage() {
       />
 
       {loading && <p className="font-mono text-[11px] uppercase tracking-wider text-muted">…</p>}
-      {error && <p className="font-mono text-[11px] text-accent">{error}</p>}
+      {error && <LoadError message={error} stale={slots.length > 0} />}
 
       {/* One column per day side by side on desktop; stacked below lg. Stage bars
           deliberately don't align across columns — each day reads as its own unit,
           the way a printed timetable sets them. */}
       <div className="grid gap-x-6 gap-y-8 lg:grid-cols-3">
-        {!loading &&
-          !error &&
+        {showContent &&
           DAYS.map((day) => (
             <section key={day.key}>
               <div className="bar mb-3 text-center">{day.label}</div>
