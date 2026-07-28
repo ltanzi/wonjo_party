@@ -29,7 +29,7 @@ Each of these was argued through; the rationale matters as much as the choice.
 | 8 | **Stacked lists** per stage (reference layout), grid deferred | Times get decided last; a time-proportional grid is empty for months. Stacked degrades gracefully when `start_time` is null. Schema supports adding a two-column grid later with no migration. |
 | 9 | **Days and stages hardcoded** in config | User's call. Mitigated by storing stable slug keys in the DB (see below) so renaming a label can't orphan data. |
 | 10 | **Line-up covers all programming**, not only music | Workshops, talks, film, ceremony need a home, or the app's schedule won't match the schedule on the wall. |
-| 11 | **One generic board** for the other seven squares | Every non-line-up section is the same shape: things with an owner, a state, and notes. One component, seven sections. Whole grid alive on day one. |
+| 11 | **One generic board** for the non-bespoke squares | Every non-line-up section is the same shape: things with an owner, a state, and notes. One component, seven sections. Whole grid alive on day one. |
 | 12 | **Eight squares** (see below) | Budget and Dallou/Site were added during the interview — money is the #1 first-festival risk, and the house build overlaps the festival timeline. |
 | 13 | **Cached reads, writes blocked offline**, staleness banner | The highest-stakes moment (backstage, 22:40, one bar of signal) is a *read*. Offline writes would mean conflict resolution for a problem that barely occurs. |
 | 14 | **Plain labelled squares** on the home page | User's call — the boldest, most beautiful version. Tile component takes an unused optional subtitle slot so live counts are a one-line addition later. |
@@ -54,7 +54,8 @@ Each of these was argued through; the rationale matters as much as the choice.
 
 ## Squares
 
-Eight, in home-page order. Line-up is bespoke; the other seven are the same board component.
+Eight, in home-page order. **Line-up** and **compilation** are bespoke pages; the other
+six share one board component.
 
 ```
 LINE-UP        PRODUCTION     LOGISTICS      COMMUNICATION
@@ -63,25 +64,34 @@ COMPILATION    BUDGET         DALLOU / SITE  TEAM
 
 ## Data model
 
-Two tables. Days, stages and sections are config, not data.
+Three tables. Days, stages and sections are config, not data.
 
 ```
 slots                              -- LINE-UP only
   id            uuid pk
   day_key       text               -- 'day-1' | 'day-2' | 'day-3'
-  stage_key     text               -- 'stage-1' | 'stage-2'
+  stage_key     text               -- 'stage-playa' | 'stage-isla'
   start_time    time null          -- null until scheduling happens
   end_time      time null
   format        text               -- see FORMATS
   artist_name   text
-  country       text null          -- 'GM', 'SN', … optional; blank renders nothing
   status        text               -- see SLOT_STATUS
   notes         text
   sort_order    int                -- ordering within a stage when times are null
   updated_by    text               -- email
   updated_at    timestamptz
 
-items                              -- all seven other squares
+compilation                        -- COMPILATION, its own page
+  id            uuid pk
+  artist        text
+  email         text
+  confirmed     boolean            -- 'Compilación: si' in the sheet it replaces
+  sent          boolean            -- track received
+  sort_order    int
+  updated_by    text
+  updated_at    timestamptz
+
+items                              -- the six generic board squares
   id            uuid pk
   section_key   text               -- 'production' | 'logistics' | …
   title         text
@@ -95,8 +105,9 @@ items                              -- all seven other squares
 ```
 
 **Slug keys are load-bearing.** `day_key` / `stage_key` / `section_key` are stable strings,
-never array indices and never display names. Renaming `"Stage 1"` → `"Mango Tree"` in config
-must not touch a single row.
+never array indices and never display names. Renaming a *label* in config must not touch a
+single row. Changing a *key* is the dangerous direction: existing rows keep the old
+one, and a row whose key is no longer listed renders nowhere and is in no count.
 
 ### RLS
 
@@ -136,14 +147,15 @@ SECTIONS = [
 SLOT_STATUS  = ['idea', 'contacted', 'confirmed', 'cancelled']
 ITEM_STATUS  = ['todo', 'doing', 'done', 'blocked']
 
-FORMATS = [                         // weight drives the badge style
-  { key: 'live',        weight: 'plain' },
-  { key: 'Dj',          weight: 'plain' },
-  { key: 'performance', weight: 'plain' },
-  { key: 'workshop',    weight: 'solid' },
-  { key: 'talk',        weight: 'solid' },
-  { key: 'film',        weight: 'solid' },
-  { key: 'A/V',         weight: 'accent' },
+// One solid ink per format, held at 85% so the paper shows through.
+FORMATS = [
+  { key: 'live',        badge: 'bg-[#1A1A1A]/85 text-bg'    },  // black
+  { key: 'dj',          badge: 'bg-[#2B5CA8]/85 text-white' },  // blue
+  { key: 'performance', badge: 'bg-[#2E6B4F]/85 text-white' },  // green
+  { key: 'workshop',    badge: 'bg-[#B07A1E]/85 text-fg'    },  // ochre
+  { key: 'talk',        badge: 'bg-[#6B4C8A]/85 text-white' },  // purple
+  { key: 'film',        badge: 'bg-[#7A4B32]/85 text-white' },  // brown
+  { key: 'A/V',         badge: 'bg-[#B82A1B]/85 text-white' },  // red
 ]
 ```
 
@@ -183,14 +195,17 @@ Matches the reference. Day bar, then per stage a bar, then rows.
 ██ PLAYA █████████████████████████████████████
  10.00-12.00  workshop   KORA BASICS
  17.00-18.00  talk       BUILDING DALLOU
- 21.00-22.00  live       FATOU N. (GM)
-┆      —      Dj       ? SIRA B. (SN)          ← contacted: dashed, muted
-└ lamin · 2h ago
+ 21.00-22.00  live       FATOU N.
+       —      dj         SIRA B. · contacted     ← muted, no time set yet
+ └ lamin · 2h ago
+ + ADD    1 CANCELLED ▾
 ```
 
 - `confirmed` renders solid, exactly like the reference.
-- `idea` / `contacted` render ghosted: dashed border, muted text, leading `?`.
-- `cancelled` renders struck through in accent red.
+- `idea` / `contacted` render muted, with the status word after the name. No rule in
+  the margin and no `?` — the colour is the scannable signal, the word is the precise one.
+- `cancelled` renders struck through in accent red, and is folded behind a per-stage
+  `N cancelled ▾` reveal rather than sitting in the timetable.
 - Null times render as `—`; rows fall back to `sort_order`.
 - Attribution is a quiet grey line under the row.
 - Section header reads `LINE-UP · kept by <name>` — social ownership, not enforced.
@@ -239,6 +254,10 @@ out, not after it's replicated seven more times.
 
 Decisions that were revised in use, and why:
 
+- **Compilation became a bespoke page and a third table.** The largest structural
+  change of the two passes, and the one decision 11 did not anticipate: the artist
+  list is an address book with two yes/no flags, not a task with a status and a due
+  date. So six sections share the board, not seven.
 - **Country dropped** from slots entirely. The festival is largely regional; the field
   was blank or `(GM)` on nearly every row.
 - **Format badges became seven inks** rather than three shared weights, so the shape of
@@ -253,6 +272,22 @@ Decisions that were revised in use, and why:
 - **Days laid side by side** on desktop, one column each.
 
 Estimate was 3–4 days of focused work; that held.
+
+### Reviewed after shipping
+
+A multi-agent review of the finished code found twelve real defects, all fixed. The
+themes worth remembering, because they are the ones that recur:
+
+- **Silence was the dominant failure mode.** Read errors were suppressed whenever a
+  cache existed, a flag toggle discarded its error, and offline detection matched on
+  browser-authored English so it never fired on Safari — the platform the crew use.
+  In each case the screen looked healthy while the truth was elsewhere.
+- **The signal was usually already there.** postgrest-js sets `status: 0` on transport
+  failure and the per-entry cache timestamp was written on every fetch; both were
+  discarded by our own types before anything could use them.
+- **Comments stating numbers were wrong more often than the code was.** The contrast
+  floor, the column width, the mechanism behind the strikethrough. A confident wrong
+  comment is worse than none, because the next reader has no reason to re-derive it.
 
 ## Open items
 

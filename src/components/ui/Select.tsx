@@ -5,7 +5,13 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
  * the OS and no CSS can reach inside it. Everything here is ours: hard edges,
  * mono type, black selection — the same language as the rest of the app.
  *
- * Keyboard: arrows move, Home/End jump, Enter or Space commits, Escape closes.
+ * Keyboard, on the trigger: Enter/Space opens when closed and commits when open,
+ * arrows open then move, Home/End jump (ignored while closed), Escape closes,
+ * Tab closes and lets focus leave.
+ *
+ * The trigger is role="combobox", not a plain button: aria-activedescendant is
+ * not valid on role="button", so screen readers drop it and announce nothing as
+ * the highlight moves. This is the ARIA select-only combobox pattern.
  */
 
 interface Option {
@@ -31,10 +37,9 @@ const trigger =
 
 export function Select({ value, onChange, options, disabled, ...aria }: Props) {
   const opts = useMemo(() => options.map(toOption), [options]);
-  const selectedIndex = Math.max(
-    0,
-    opts.findIndex((o) => o.value === value),
-  );
+  // -1 stays -1. Clamping it to 0 made the control display the first option's
+  // label while holding a value it never showed — a lying primitive.
+  const selectedIndex = opts.findIndex((o) => o.value === value);
 
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(selectedIndex);
@@ -58,7 +63,7 @@ export function Select({ value, onChange, options, disabled, ...aria }: Props) {
   }, [open, active]);
 
   function show() {
-    setActive(selectedIndex);
+    setActive(Math.max(0, selectedIndex));
     setOpen(true);
   }
 
@@ -111,6 +116,7 @@ export function Select({ value, onChange, options, disabled, ...aria }: Props) {
     <div ref={wrapRef} className="relative">
       <button
         type="button"
+        role="combobox"
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : show())}
         onKeyDown={onKeyDown}
@@ -123,7 +129,8 @@ export function Select({ value, onChange, options, disabled, ...aria }: Props) {
         }`}
         {...aria}
       >
-        <span className="truncate">{opts[selectedIndex]?.label ?? ""}</span>
+        {/* An unrecognised value shows itself rather than pretending to be option 0 */}
+        <span className="truncate">{opts[selectedIndex]?.label ?? value}</span>
         <span aria-hidden="true" className="text-muted">
           {open ? "▴" : "▾"}
         </span>
@@ -143,8 +150,9 @@ export function Select({ value, onChange, options, disabled, ...aria }: Props) {
               role="option"
               aria-selected={o.value === value}
               onMouseEnter={() => setActive(i)}
-              // mousedown, not click: keeps focus on the trigger so the blur
-              // handler can't close the list before the choice registers
+              // preventDefault on mousedown, not onClick: stops focus moving to
+              // the <li>. onKeyDown lives on the trigger only, so if focus ever
+              // left it, arrows and Escape would go dead after a mouse pick.
               onMouseDown={(e) => {
                 e.preventDefault();
                 commit(i);

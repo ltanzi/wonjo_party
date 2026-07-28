@@ -15,9 +15,6 @@ export interface Slot {
   updated_at: string;
 }
 
-/** Fields the client may write; the rest are set by the audit trigger. */
-export type SlotDraft = Omit<Slot, "id" | "updated_by" | "updated_at">;
-
 /** One row of the old `artistas compilación` spreadsheet. */
 export interface CompilationArtist {
   id: string;

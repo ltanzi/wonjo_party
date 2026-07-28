@@ -2,8 +2,11 @@
  * The entire hardcoded surface of the app, deliberately in one file.
  *
  * Days, stages and sections are config rather than data (SPEC.md, decision 9).
- * Changing a label here is a one-line edit and a deploy. It is safe because the
- * database stores the `key`, never the label — renaming PLAYA cannot orphan a slot.
+ * Changing a *label* here is a one-line edit and a deploy, and it is safe: the
+ * database stores the `key`, so renaming PLAYA to anything cannot orphan a slot.
+ * Changing a *key* is the opposite — existing rows keep the old one, and a row
+ * whose key is no longer listed renders nowhere and appears in no count. Treat
+ * keys as permanent unless you also write a migration.
  */
 
 export const FESTIVAL = "WONJO PARTY";
@@ -24,8 +27,10 @@ export const STAGES = [
  * says who keeps this section, so people know whom to ask. Fill in the names;
  * an empty string renders as unassigned.
  *
- * Keep `blurb` under ~90 characters. The page is 736px of Inconsolata at 13px,
- * which is about 113 characters, so anything longer wraps to a second line.
+ * Keep `blurb` under ~90 characters. The narrowest page that renders one is 736px
+ * (max-w-3xl less px-4 either side) of Inconsolata at 13px — its advance is half
+ * an em, so 6.5px a character, about 113 before it wraps. The line-up page is
+ * wider, but 736px is the binding case; 90 leaves margin for edits.
  */
 export const SECTIONS = [
   {
@@ -105,10 +110,18 @@ export const ITEM_STATUS_CHIP: Record<(typeof ITEM_STATUS)[number], string> = {
  * warm-leaning, none of them competing with the accent red used for errors and
  * cancellations. Held at 85% so the paper and its grain show through.
  *
- * 85% is the floor, not a taste call. Compositing over #EDE8E0 lightens each ink
- * and drops its contrast against the label; below 0.85 several pairings fall
- * under 4.5:1 at the 11px these render at. A/V is a slightly deeper red than the
- * UI accent for the same reason — at #E63B2E it does not clear AA even opaque.
+ * All eleven pairings here and in ITEM_STATUS_CHIP clear 4.5:1 at the 11px they
+ * render at, measured composited over #EDE8E0. The binding one is `performance`
+ * at 4.71; the true floor is 0.83, where it reaches 4.55 — so 0.85 is that floor
+ * plus a little margin, not a cliff.
+ *
+ * Only the white-label inks are constrained. Lightening an ink lowers contrast
+ * against white but *raises* it against dark text, so `workshop` and `todo` gain
+ * from the transparency — workshop is 4.68 opaque and 5.65 at 85%, and would
+ * pass at any alpha.
+ *
+ * A/V is a deeper red than the UI accent because #E63B2E manages only 4.18 on
+ * white, failing AA even fully opaque.
  *
  * Full class strings, not composed ones — Tailwind scans source text, so
  * `bg-[${hex}]` built at runtime would never be generated.
@@ -126,9 +139,6 @@ export const FORMATS = [
 /** Stable identity for <Select options>, so the list isn't rebuilt every render. */
 export const FORMAT_KEYS = FORMATS.map((f) => f.key);
 
-export type DayKey = (typeof DAYS)[number]["key"];
-export type StageKey = (typeof STAGES)[number]["key"];
-export type SectionKey = (typeof SECTIONS)[number]["key"];
 export type SlotStatus = (typeof SLOT_STATUS)[number];
 export type ItemStatus = (typeof ITEM_STATUS)[number];
 export type Format = (typeof FORMATS)[number]["key"];

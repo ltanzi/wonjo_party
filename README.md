@@ -23,7 +23,7 @@ browser. No server. Deployed free to GitHub Pages.
 3. **Authentication → Sign In / Providers → Email** → turn **Confirm email OFF**.
    There is no mail provider wired up; accounts are created by hand.
 4. **Authentication → Users → Add user → Create new user**, with **Auto Confirm User**
-   ticked. Two accounts for now — you and your friend. The other eight come in pass 2.
+   ticked. See Status below for how many accounts you need right now.
 5. **Project Settings → API** → copy the **Project URL** and the **anon public** key.
 
 ### 2. Local development
@@ -61,8 +61,12 @@ reference it.
 
 **Pass 1 — done.** Auth, the eight-square home page, and the full line-up section.
 
-**Pass 2 — done.** The generic board across the other seven squares, and the offline
-read cache with staleness banner.
+**Pass 2 — done.** The generic board across six squares, a bespoke compilation page,
+and the offline read cache with staleness banner.
+
+**Reviewed and fixed.** A multi-agent review of the finished code found twelve defects
+— silent read errors, offline detection that missed Safari, unstable row ordering — all
+fixed. See "Reviewed after shipping" in `SPEC.md`.
 
 **Remaining: create the other eight accounts and hand it over.** Same steps as the
 first two (Authentication → Users → Add user, Auto Confirm ticked). Delete the

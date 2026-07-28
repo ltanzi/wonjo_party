@@ -49,7 +49,8 @@ function Gate() {
 
 export function App() {
   return (
-    // BASE_URL is '/wonjo_party/' in production, '/' in dev
+    // BASE_URL is '/wonjo_party/' everywhere — Vite applies `base` in dev too,
+    // so the dev server also serves under /wonjo_party/ (a bare path 404s).
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AuthProvider>
         <Gate />

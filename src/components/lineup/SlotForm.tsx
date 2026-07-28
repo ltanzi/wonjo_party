@@ -83,9 +83,10 @@ export function SlotForm({ slot, dayKey, stageKey, nextSortOrder, onDone, onCanc
         />
       </div>
 
-      {/* Two columns, fixed: Tailwind breakpoints track the viewport rather than
-          the container, so a responsive count would cram fields into a ~380px day
-          column on desktop. Two fit everywhere this form appears. */}
+      {/* Two columns, fixed. Tailwind breakpoints track the viewport, not the
+          container (no container-query plugin), so a responsive count could not
+          see that this form sits in a day column 315-357px wide on desktop —
+          992px or 1120px of content, three columns, 24px gaps. Two fit. */}
       <div className="mb-3 grid grid-cols-2 gap-2">
         <label className="block">
           <Label>Start</Label>

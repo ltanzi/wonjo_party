@@ -17,8 +17,10 @@ import { ArtistForm } from "@/components/compilation/ArtistForm";
  * straight from the row — this is used like a spreadsheet, so flipping a cell
  * should not mean opening a form.
  *
- * Columns are fixed width and the table scrolls sideways on a narrow screen
- * rather than reflowing, which keeps it readable as a table.
+ * The two flag columns are fixed and the name/email columns are fractional; the
+ * sideways scroll on a narrow screen comes from min-w on the inner div inside an
+ * overflow-x-auto wrapper, not from the column widths. Removing that min-w makes
+ * it reflow and stop reading as a table.
  */
 const COLS = "grid grid-cols-[1fr_1.5fr_4.5rem_4.5rem] gap-2";
 
@@ -101,8 +103,10 @@ export function CompilationPage() {
 
   const nextSortOrder = rows.length ? Math.max(...rows.map((r) => r.sort_order)) + 1 : 0;
 
-  const sent = rows.filter((r) => r.sent).length;
+  // Counted over the same set: sent-but-not-confirmed would otherwise let the
+  // header read something impossible, like "3/2 tracks in".
   const confirmed = rows.filter((r) => r.confirmed).length;
+  const sentAndConfirmed = rows.filter((r) => r.confirmed && r.sent).length;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
@@ -114,7 +118,7 @@ export function CompilationPage() {
           showContent &&
           rows.length > 0 && (
             <span className="whitespace-nowrap font-mono text-[11px] uppercase tracking-wider text-muted">
-              {sent}/{confirmed} tracks in
+              {sentAndConfirmed}/{confirmed} tracks in
             </span>
           )
         }

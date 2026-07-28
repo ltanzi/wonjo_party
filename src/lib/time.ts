@@ -1,6 +1,6 @@
 /**
  * Postgres `time` comes back as 'HH:MM:SS'. The reference timetable writes times
- * with a dot separator ("21.00 - 22.00"), so that's what we render.
+ * with a dot separator, so that's what we render: "21.00-22.00", no spaces.
  */
 
 export const toInputTime = (t: string | null) => (t ? t.slice(0, 5) : "");
@@ -13,13 +13,16 @@ export function formatRange(start: string | null, end: string | null) {
   return formatTime(start ?? end);
 }
 
-/** 'now' rendered the way the offline banner wants it: 14.20 */
+/** A timestamp as the offline banner wants it: 14.20. Always a past instant. */
 export const clockLabel = (iso: string) => {
   const d = new Date(iso);
   return `${String(d.getHours()).padStart(2, "0")}.${String(d.getMinutes()).padStart(2, "0")}`;
 };
 
-/** Board due dates: '2027-01-15' → '15 Jan'. */
+/**
+ * Board due dates: '2027-03-15' → '15 Mar' within the current year, and
+ * '15 Mar 2027' outside it. So festival dates read with the year until 2027.
+ */
 export function shortDate(iso: string) {
   const [y, m, d] = iso.split("-").map(Number);
   const months = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ");

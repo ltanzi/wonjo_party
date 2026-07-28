@@ -12,7 +12,10 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # GitHub recommends false for Pages: cancelling between upload-pages-artifact
+  # and deploy-pages can abort a deployment mid-flight. Two quick pushes should
+  # queue, not cancel each other.
+  cancel-in-progress: false
 
 jobs:
   build:

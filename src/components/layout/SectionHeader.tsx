@@ -1,8 +1,8 @@
 import { findSection } from "@/config";
 
 /**
- * Shared by the line-up and (from pass 2) every board, so the seven sections
- * can't drift apart. `meta` is the optional right-hand slot — the line-up uses
+ * Shared by all eight section pages — the two bespoke ones and the six boards —
+ * so their headers can't drift apart. `meta` is the optional right-hand slot — the line-up uses
  * it for its confirmed count.
  */
 export function SectionHeader({

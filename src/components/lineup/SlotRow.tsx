@@ -13,10 +13,13 @@ import { formatRange, relativeTime } from "@/lib/time";
  * No rules or markers in the margin: the colour is the scannable signal and the
  * word is the precise one, which between them cover it.
  *
- * Note the strike is not set here. Text decoration on a block propagates to its
- * descendants and paints across the full width of each box — and this row's
- * children are grid containers, so it rendered as a bar spanning the whole row.
- * It belongs on the name span.
+ * Note the strike is not set here. Text decoration propagates from a block to
+ * its in-flow descendants; for ordinary text that paints over the words, but
+ * grid items are blockified and engines paint the line across each item's full
+ * width and the gaps between them. This row's children are grid containers, so
+ * a strike on the button drew a continuous bar over the time, the badge, the
+ * notes and the attribution. It belongs on the name span — see line-through in
+ * the artist name below.
  */
 const statusStyle: Record<Slot["status"], string> = {
   confirmed: "",
@@ -44,7 +47,7 @@ export function SlotRow({
       disabled={disabled}
       className={`block w-full py-1 pl-2 pr-1 text-left ${
         disabled ? "cursor-default" : "hover:bg-soft/60"
-      } ${statusStyle[slot.status]}`}
+      } ${statusStyle[slot.status] ?? ""}`}
     >
       <div className="grid grid-cols-[4.75rem_1fr] items-baseline gap-2">
         <span className="text-[11px] tabular-nums text-muted">

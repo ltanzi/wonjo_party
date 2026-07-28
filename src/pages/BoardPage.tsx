@@ -13,7 +13,10 @@ import { ItemForm } from "@/components/board/ItemForm";
 
 type Editing = { kind: "edit"; id: string } | { kind: "new" } | null;
 
-/** The seven non-line-up sections, all the same board (SPEC.md, decision 11). */
+/**
+ * The six generic sections, all the same board (SPEC.md, decision 11).
+ * Line-up and compilation are bespoke and have their own pages.
+ */
 export function BoardPage() {
   const { sectionKey } = useParams();
   const section = sectionKey ? findSection(sectionKey) : undefined;
