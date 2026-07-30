@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { DAYS, STAGES } from "@/config";
 import { supabase } from "@/lib/supabase";
 import type { Slot } from "@/lib/types";
@@ -29,6 +29,20 @@ export function LineupPage() {
   const { rows: slots, loading, error, reload } = useTable<Slot>("slots", fetcher);
   const online = useOnline();
   const [editing, setEditing] = useState<Editing>(null);
+
+  // Type-ahead only, never enforced — someone booking an artist who isn't on the
+  // compilation list is a normal case, not an error. A distinct cache key and a
+  // narrower select than CompilationPage's, so this can't clobber that page's
+  // fuller cached rows with one missing email/confirmed/sent.
+  const namesFetcher = useCallback(() => supabase.from("compilation").select("artist"), []);
+  const { rows: compilationRows } = useTable<{ artist: string }>(
+    "compilation:artists",
+    namesFetcher,
+  );
+  const artistSuggestions = useMemo(() => {
+    const names = compilationRows.map((r) => r.artist.trim()).filter(Boolean);
+    return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
+  }, [compilationRows]);
 
   const done = () => {
     setEditing(null);
@@ -113,6 +127,7 @@ export function LineupPage() {
                           dayKey={day.key}
                           stageKey={stage.key}
                           nextSortOrder={nextSortOrder}
+                          suggestions={artistSuggestions}
                           onDone={done}
                           onCancel={() => setEditing(null)}
                         />
@@ -131,6 +146,7 @@ export function LineupPage() {
                         dayKey={day.key}
                         stageKey={stage.key}
                         nextSortOrder={nextSortOrder}
+                        suggestions={artistSuggestions}
                         onDone={done}
                         onCancel={() => setEditing(null)}
                       />
@@ -167,6 +183,7 @@ export function LineupPage() {
                             dayKey={day.key}
                             stageKey={stage.key}
                             nextSortOrder={nextSortOrder}
+                            suggestions={artistSuggestions}
                             onDone={done}
                             onCancel={() => setEditing(null)}
                           />

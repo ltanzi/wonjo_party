@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useId, useState } from "react";
 import { FORMAT_KEYS, SLOT_STATUS } from "@/config";
 import type { Format, SlotStatus } from "@/config";
 import type { Slot } from "@/lib/types";
@@ -15,6 +15,13 @@ interface Props {
   stageKey: string;
   /** Next free position in this stage; nothing set it before, so rows all tied at 0. */
   nextSortOrder: number;
+  /**
+   * Artist names from the COMPILATION list, for type-ahead only — never enforced.
+   * Booking someone who isn't on that list is a normal case, not an error, so this
+   * is a native <datalist> rather than the Select component: free text with hints,
+   * not a closed set of options.
+   */
+  suggestions: string[];
   onDone: () => void;
   onCancel: () => void;
 }
@@ -22,7 +29,16 @@ interface Props {
 /** Empty time inputs must become SQL NULL, not '' — Postgres `time` rejects ''. */
 const orNull = (v: string) => (v.trim() === "" ? null : v.trim());
 
-export function SlotForm({ slot, dayKey, stageKey, nextSortOrder, onDone, onCancel }: Props) {
+export function SlotForm({
+  slot,
+  dayKey,
+  stageKey,
+  nextSortOrder,
+  suggestions,
+  onDone,
+  onCancel,
+}: Props) {
+  const datalistId = useId();
   const [artistName, setArtistName] = useState(slot?.artist_name ?? "");
   const [start, setStart] = useState(toInputTime(slot?.start_time ?? null));
   const [end, setEnd] = useState(toInputTime(slot?.end_time ?? null));
@@ -78,9 +94,17 @@ export function SlotForm({ slot, dayKey, stageKey, nextSortOrder, onDone, onCanc
         <Input
           value={artistName}
           onChange={(e) => setArtistName(e.target.value)}
+          list={datalistId}
           autoFocus
           required
         />
+        {/* Native type-ahead: no dependency, and it degrades to a plain text
+            field with no suggestions if the list is empty. */}
+        <datalist id={datalistId}>
+          {suggestions.map((name) => (
+            <option key={name} value={name} />
+          ))}
+        </datalist>
       </div>
 
       {/* Two columns, fixed. Tailwind breakpoints track the viewport, not the
