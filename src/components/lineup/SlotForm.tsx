@@ -1,4 +1,4 @@
-import { FormEvent, useId, useState } from "react";
+import { FormEvent, useState } from "react";
 import { FORMAT_KEYS, SLOT_STATUS } from "@/config";
 import type { Format, SlotStatus } from "@/config";
 import type { Slot } from "@/lib/types";
@@ -8,6 +8,7 @@ import { toInputTime } from "@/lib/time";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Textarea } from "@/components/ui/Field";
 import { Select } from "@/components/ui/Select";
+import { Autocomplete } from "@/components/ui/Autocomplete";
 
 interface Props {
   slot?: Slot; // absent = creating
@@ -18,8 +19,7 @@ interface Props {
   /**
    * Artist names from the COMPILATION list, for type-ahead only — never enforced.
    * Booking someone who isn't on that list is a normal case, not an error, so this
-   * is a native <datalist> rather than the Select component: free text with hints,
-   * not a closed set of options.
+   * feeds Autocomplete (free text with hints) rather than the closed-set Select.
    */
   suggestions: string[];
   onDone: () => void;
@@ -38,7 +38,6 @@ export function SlotForm({
   onDone,
   onCancel,
 }: Props) {
-  const datalistId = useId();
   const [artistName, setArtistName] = useState(slot?.artist_name ?? "");
   const [start, setStart] = useState(toInputTime(slot?.start_time ?? null));
   const [end, setEnd] = useState(toInputTime(slot?.end_time ?? null));
@@ -91,20 +90,14 @@ export function SlotForm({
     <form onSubmit={onSubmit} className="border-l border-fg/40 bg-soft/40 py-3 pl-3 pr-2">
       <div className="mb-3">
         <Label>Name</Label>
-        <Input
+        <Autocomplete
           value={artistName}
-          onChange={(e) => setArtistName(e.target.value)}
-          list={datalistId}
+          onChange={setArtistName}
+          options={suggestions}
+          aria-label="Name"
           autoFocus
           required
         />
-        {/* Native type-ahead: no dependency, and it degrades to a plain text
-            field with no suggestions if the list is empty. */}
-        <datalist id={datalistId}>
-          {suggestions.map((name) => (
-            <option key={name} value={name} />
-          ))}
-        </datalist>
       </div>
 
       {/* Two columns, fixed. Tailwind breakpoints track the viewport, not the
