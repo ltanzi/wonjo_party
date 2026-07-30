@@ -22,6 +22,7 @@ export interface CompilationArtist {
   email: string;
   confirmed: boolean; // 'Compilación: si' in the sheet
   sent: boolean; // track received
+  drive_link: string; // Google Drive URL; '' when not set
   sort_order: number;
   updated_by: string;
   updated_at: string;

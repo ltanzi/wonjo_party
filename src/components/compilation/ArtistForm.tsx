@@ -13,9 +13,21 @@ interface Props {
   onCancel: () => void;
 }
 
+/**
+ * People paste "drive.google.com/…" as often as the full URL, and a link without
+ * a scheme resolves relative to this site — so it would 404 inside the app
+ * instead of opening Drive. Add the scheme rather than rejecting the paste.
+ */
+function withScheme(url: string) {
+  const trimmed = url.trim();
+  if (!trimmed || /^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 export function ArtistForm({ artist, nextSortOrder, onDone, onCancel }: Props) {
   const [name, setName] = useState(artist?.artist ?? "");
   const [email, setEmail] = useState(artist?.email ?? "");
+  const [driveLink, setDriveLink] = useState(artist?.drive_link ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -26,7 +38,11 @@ export function ArtistForm({ artist, nextSortOrder, onDone, onCancel }: Props) {
     setError(null);
 
     // confirmed / sent are toggled straight from the row, not set here
-    const payload = { artist: name.trim(), email: email.trim() };
+    const payload = {
+      artist: name.trim(),
+      email: email.trim(),
+      drive_link: withScheme(driveLink),
+    };
     const { error, status } = artist
       ? await supabase.from("compilation").update(payload).eq("id", artist.id)
       : await supabase.from("compilation").insert({ ...payload, sort_order: nextSortOrder });
@@ -63,6 +79,17 @@ export function ArtistForm({ artist, nextSortOrder, onDone, onCancel }: Props) {
             autoComplete="off"
           />
         </label>
+      </div>
+
+      <div className="mb-3">
+        <Label>Drive link</Label>
+        <Input
+          value={driveLink}
+          onChange={(e) => setDriveLink(e.target.value)}
+          inputMode="url"
+          autoComplete="off"
+          placeholder="https://drive.google.com/…"
+        />
       </div>
 
       {error && <p className="mb-2 font-mono text-[11px] text-accent">{error}</p>}

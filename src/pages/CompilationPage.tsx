@@ -22,7 +22,7 @@ import { ArtistForm } from "@/components/compilation/ArtistForm";
  * overflow-x-auto wrapper, not from the column widths. Removing that min-w makes
  * it reflow and stop reading as a table.
  */
-const COLS = "grid grid-cols-[1fr_1.5fr_4.5rem_4.5rem] gap-2";
+const COLS = "grid grid-cols-[1fr_1.5fr_4.5rem_4.5rem_5rem] gap-2";
 
 function Flag({
   on,
@@ -50,6 +50,30 @@ function Flag({
     >
       {pending ? "…" : on ? "yes" : "no"}
     </button>
+  );
+}
+
+/**
+ * Only rendered as an anchor when the value really is an http(s) URL. Anything
+ * else — a row edited straight in the dashboard, a half-pasted string — shows as
+ * plain text, so the table can't produce a link that goes somewhere unintended.
+ */
+function DriveLink({ url }: { url: string }) {
+  const safe = /^https?:\/\//i.test(url.trim());
+
+  if (!url.trim()) return <span className="text-[11px] text-muted">—</span>;
+  if (!safe) return <span className="truncate text-[11px] text-muted">{url}</span>;
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={url}
+      className="text-[11px] underline underline-offset-2 hover:no-underline"
+    >
+      open ↗
+    </a>
   );
 }
 
@@ -131,12 +155,13 @@ export function CompilationPage() {
       {showContent && (
         <>
           <div className="overflow-x-auto">
-            <div className="min-w-[30rem]">
+            <div className="min-w-[35rem]">
               <div className={`bar ${COLS}`}>
                 <span>Artist</span>
                 <span>Email</span>
                 <span>Confirmed</span>
                 <span>Sent</span>
+                <span>Drive Link</span>
               </div>
 
               {rows.length === 0 && editing !== "new" && (
@@ -185,8 +210,10 @@ export function CompilationPage() {
                       onToggle={() => void toggle(row, "sent")}
                     />
 
+                    <DriveLink url={row.drive_link} />
+
                     {row.updated_by && (
-                      <span className="col-span-4 text-[11px] text-muted/70">
+                      <span className="col-span-5 text-[11px] text-muted/70">
                         └ {row.updated_by.split("@")[0]} · {relativeTime(row.updated_at)}
                       </span>
                     )}

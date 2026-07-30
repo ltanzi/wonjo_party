@@ -109,6 +109,7 @@ create table if not exists public.compilation (
   email      text not null default '',
   confirmed  boolean not null default false, -- 'Compilación: si' in the old sheet
   sent       boolean not null default false, -- track received
+  drive_link text not null default '',       -- Google Drive URL for the file
   sort_order int not null default 0,
   updated_by text not null default '',
   updated_at timestamptz not null default now()
