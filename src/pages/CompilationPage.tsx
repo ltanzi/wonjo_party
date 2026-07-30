@@ -58,18 +58,22 @@ function Flag({
  * else — a row edited straight in the dashboard, a half-pasted string — shows as
  * plain text, so the table can't produce a link that goes somewhere unintended.
  */
-function DriveLink({ url }: { url: string }) {
-  const safe = /^https?:\/\//i.test(url.trim());
+function DriveLink({ url }: { url?: string }) {
+  // Optional, not `string`, because rows can arrive from a cache written before
+  // drive_link existed — that is how the first version of this whited out the
+  // page. Never assume a cached row has the shape the current types declare.
+  const value = (url ?? "").trim();
 
-  if (!url.trim()) return <span className="text-[11px] text-muted">—</span>;
-  if (!safe) return <span className="truncate text-[11px] text-muted">{url}</span>;
+  if (!value) return <span className="text-[11px] text-muted">—</span>;
+  if (!/^https?:\/\//i.test(value))
+    return <span className="truncate text-[11px] text-muted">{value}</span>;
 
   return (
     <a
-      href={url}
+      href={value}
       target="_blank"
       rel="noopener noreferrer"
-      title={url}
+      title={value}
       className="text-[11px] underline underline-offset-2 hover:no-underline"
     >
       open ↗

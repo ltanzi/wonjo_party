@@ -10,7 +10,18 @@
  * unread (SPEC.md, known limit).
  */
 
-const PREFIX = "wonjo:";
+/**
+ * Bump the version whenever a row type in lib/types.ts gains or loses a field.
+ * Cached rows outlive migrations: a browser holds the old shape indefinitely and
+ * useTable renders it before any fetch can replace it, so a component written
+ * against the new shape sees `undefined` where it expects a value. Changing the
+ * prefix orphans the old entries instead of feeding them to the app.
+ *
+ * v2: compilation gained drive_link.
+ */
+const BASE = "wonjo:";
+const PREFIX = `${BASE}2:`;
+
 interface Entry<T> {
   at: string; // ISO
   data: T;
@@ -41,11 +52,17 @@ export function writeCache<T>(key: string, data: T): string {
   return at;
 }
 
-/** Called on sign-out — the cache holds crew data and shouldn't outlive a session. */
+/**
+ * Called on sign-out — the cache holds crew data and shouldn't outlive a session —
+ * and offered as an escape hatch by the error boundary.
+ *
+ * Clears every version, not just the current one, so orphaned entries from an
+ * older shape don't sit in storage forever and a stuck browser really is reset.
+ */
 export function clearCache() {
   try {
     Object.keys(localStorage)
-      .filter((k) => k.startsWith(PREFIX))
+      .filter((k) => k.startsWith(BASE))
       .forEach((k) => localStorage.removeItem(k));
   } catch {
     // Storage unavailable — which means writeCache never persisted anything
