@@ -4,6 +4,7 @@ import { LoginPage } from "@/auth/LoginPage";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { HomePage } from "@/pages/HomePage";
 import { LineupPage } from "@/pages/LineupPage";
+import { CalendarPage } from "@/pages/CalendarPage";
 import { CompilationPage } from "@/pages/CompilationPage";
 import { BoardPage } from "@/pages/BoardPage";
 
@@ -39,6 +40,7 @@ function Gate() {
         <Route path="/" element={<HomePage />} />
         {/* Bespoke sections before the generic board */}
         <Route path="/lineup" element={<LineupPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/compilation" element={<CompilationPage />} />
         <Route path="/:sectionKey" element={<BoardRoute />} />
         <Route path="*" element={<Navigate to="/" replace />} />

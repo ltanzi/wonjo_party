@@ -130,3 +130,39 @@ create policy "authenticated full access"
   to authenticated
   using (true)
   with check (true);
+
+-- ------------------------------------------------------------ shared calendar
+
+create table if not exists public.milestones (
+  id         uuid primary key default gen_random_uuid(),
+  start_date date not null,
+  end_date   date not null,              -- windows, not single due dates
+  title      text not null default '',
+  owner      text,
+  status     text not null default 'todo',
+  notes      text not null default '',
+  updated_by text not null default '',
+  updated_at timestamptz not null default now(),
+
+  constraint milestones_status_valid check (
+    status in ('todo', 'doing', 'done', 'blocked')
+  ),
+  constraint milestones_range_valid check (end_date >= start_date)
+);
+
+create index if not exists milestones_chrono_idx
+  on public.milestones (start_date, end_date, id);
+
+drop trigger if exists milestones_audit on public.milestones;
+create trigger milestones_audit
+  before insert or update on public.milestones
+  for each row execute function public.set_audit_fields();
+
+alter table public.milestones enable row level security;
+
+drop policy if exists "authenticated full access" on public.milestones;
+create policy "authenticated full access"
+  on public.milestones for all
+  to authenticated
+  using (true)
+  with check (true);

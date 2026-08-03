@@ -59,6 +59,15 @@ export const SECTIONS = [
     blurb: "Poster, socials, press and the announcement calendar.",
   },
   {
+    // Index 4 of nine, so it lands dead centre of the 3×3 grid on desktop —
+    // the cell that used to be a deliberate blank.
+    key: "calendar",
+    label: "CALENDAR",
+    bespoke: true,
+    owner: "",
+    blurb: "What has to happen when. Shared deadlines, month by month.",
+  },
+  {
     key: "compilation",
     label: "COMPILATION",
     bespoke: true,

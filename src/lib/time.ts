@@ -29,6 +29,37 @@ export function shortDate(iso: string) {
   return `${d} ${months[m - 1]}${y !== new Date().getFullYear() ? ` ${y}` : ""}`;
 }
 
+const MONTHS =
+  "January February March April May June July August September October November December".split(
+    " ",
+  );
+
+/** Calendar month heading: '2026-08-03' → 'August 2026'. The year is always shown
+ *  because the plan spans into January 2027 and 'January' alone would be ambiguous. */
+export function monthLabel(iso: string) {
+  const [y, m] = iso.split("-").map(Number);
+  return `${MONTHS[m - 1]} ${y}`;
+}
+
+/** Groups milestones by the month their window opens in. */
+export const monthKey = (iso: string) => iso.slice(0, 7);
+
+/**
+ * A window, written the way the crew write it:
+ *   same day          → '3 Aug'
+ *   within one month   → '3–16 Aug'
+ *   spanning months    → '28 Sep – 2 Oct'
+ */
+export function dateRange(start: string, end: string) {
+  const [, sm, sd] = start.split("-").map(Number);
+  const [, em, ed] = end.split("-").map(Number);
+  const short = (m: number) => MONTHS[m - 1].slice(0, 3);
+
+  if (start === end) return `${sd} ${short(sm)}`;
+  if (sm === em) return `${sd}–${ed} ${short(sm)}`;
+  return `${sd} ${short(sm)} – ${ed} ${short(em)}`;
+}
+
 /** Compared by date, not instant — a task due today is not yet late. */
 export function isOverdue(iso: string | null) {
   if (!iso) return false;

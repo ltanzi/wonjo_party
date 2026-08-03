@@ -3,9 +3,14 @@ import { SECTIONS } from "@/config";
 import { Header } from "@/components/layout/Header";
 
 /**
- * Eight plain labelled squares (SPEC.md, decision 14). No counts by choice —
- * the optional subtitle slot below is deliberately unused so live status can be
- * added later as a one-line change rather than a redesign.
+ * Nine plain labelled squares (SPEC.md, decision 14). No counts by choice — the
+ * optional subtitle slot below is deliberately unused so live status can be added
+ * later as a one-line change rather than a redesign.
+ *
+ * Nine fills the three-column grid exactly, so the centre cell that used to be a
+ * deliberate blank is now CALENDAR and no nudge is needed. Two columns don't
+ * divide nine evenly though, so the last tile spans both on mobile — a full-width
+ * block rather than an orphan next to a hole.
  */
 export function HomePage() {
   return (
@@ -17,23 +22,26 @@ export function HomePage() {
       </p>
 
       <div className="grid grid-cols-2 gap-px bg-fg/15 sm:grid-cols-3">
-        {SECTIONS.map((section, i) => (
-          <Link
-            key={section.key}
-            to={`/${section.key}`}
-            // Eight tiles in a three-column grid leave one cell empty. Pushing the
-            // fifth tile to the last column moves that gap to the dead centre, so it
-            // reads as a deliberate block rather than a hole in the corner. Two
-            // columns on mobile divide evenly, so no nudge is needed there.
-            className={`group flex aspect-square flex-col items-center justify-center bg-bg p-3 text-center no-underline transition-colors hover:bg-fg ${
-              i === 4 ? "sm:col-start-3" : ""
-            }`}
-          >
-            <span className="font-mono text-[11px] uppercase tracking-widest text-fg group-hover:text-bg sm:text-xs">
-              {section.label}
-            </span>
-          </Link>
-        ))}
+        {SECTIONS.map((section, i) => {
+          const isLast = i === SECTIONS.length - 1;
+          const evenColumns = SECTIONS.length % 2 === 0;
+
+          return (
+            <Link
+              key={section.key}
+              to={`/${section.key}`}
+              className={`group flex flex-col items-center justify-center bg-bg p-3 text-center no-underline transition-colors hover:bg-fg sm:aspect-square ${
+                isLast && !evenColumns
+                  ? "max-sm:col-span-2 max-sm:py-8 aspect-auto"
+                  : "aspect-square"
+              }`}
+            >
+              <span className="font-mono text-[11px] uppercase tracking-widest text-fg group-hover:text-bg sm:text-xs">
+                {section.label}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

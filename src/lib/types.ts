@@ -15,6 +15,22 @@ export interface Slot {
   updated_at: string;
 }
 
+/**
+ * One dated task on the shared calendar. A window rather than a due date —
+ * the crew write plans as "3–16 August", with several tasks sharing a window.
+ */
+export interface Milestone {
+  id: string;
+  start_date: string; // 'YYYY-MM-DD'
+  end_date: string; // inclusive; equals start_date for a single day
+  title: string;
+  owner: string | null;
+  status: ItemStatus;
+  notes: string;
+  updated_by: string;
+  updated_at: string;
+}
+
 /** One row of the old `artistas compilación` spreadsheet. */
 export interface CompilationArtist {
   id: string;
