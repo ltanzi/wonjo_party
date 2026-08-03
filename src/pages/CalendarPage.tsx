@@ -7,7 +7,7 @@ import { dateRange, isOverdue, monthKey, monthLabel, relativeTime } from "@/lib/
 import { Header } from "@/components/layout/Header";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { LoadError } from "@/components/layout/LoadError";
-import { StatusChip } from "@/components/board/StatusChip";
+import { SectionChip } from "@/components/calendar/SectionChip";
 import { MilestoneForm } from "@/components/calendar/MilestoneForm";
 
 type Editing = { kind: "edit"; id: string } | { kind: "new"; start?: string; end?: string } | null;
@@ -124,27 +124,38 @@ export function CalendarPage() {
                             online ? "hover:bg-soft/60" : "cursor-default"
                           } ${task.status === "done" ? "text-muted" : ""}`}
                         >
-                          <div className="grid grid-cols-[5.25rem_1fr] items-baseline gap-2">
-                            <StatusChip status={task.status} />
+                          <div className="grid grid-cols-[6.5rem_1fr] items-baseline gap-2">
+                            <SectionChip sectionKey={task.section_key} />
                             <div className="flex flex-wrap items-baseline gap-x-2">
                               <span>
                                 {task.title || <span className="text-muted">untitled</span>}
                               </span>
-                              {task.owner && (
-                                <span className="text-[11px] text-muted">{task.owner}</span>
+                              {/* Status as a word, not a second chip. The colour
+                                  block is the area now, and two coloured chips
+                                  drawn from one palette would read as two facts
+                                  of the same kind. Mirrors SlotRow: done recedes,
+                                  blocked shouts, todo is the silent default. */}
+                              {task.status !== "todo" && (
+                                <span
+                                  className={`font-mono text-[11px] uppercase tracking-wider ${
+                                    task.status === "blocked" ? "text-accent" : "text-muted"
+                                  }`}
+                                >
+                                  · {task.status}
+                                </span>
                               )}
                             </div>
                           </div>
 
                           {task.notes && (
-                            <div className="grid grid-cols-[5.25rem_1fr] gap-2">
+                            <div className="grid grid-cols-[6.5rem_1fr] gap-2">
                               <span />
                               <span className="text-[11px] text-muted">{task.notes}</span>
                             </div>
                           )}
 
                           {task.updated_by && (
-                            <div className="grid grid-cols-[5.25rem_1fr] gap-2">
+                            <div className="grid grid-cols-[6.5rem_1fr] gap-2">
                               <span />
                               <span className="text-[11px] text-muted/70">
                                 └ {task.updated_by.split("@")[0]} · {relativeTime(task.updated_at)}

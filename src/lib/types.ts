@@ -24,7 +24,8 @@ export interface Milestone {
   start_date: string; // 'YYYY-MM-DD'
   end_date: string; // inclusive; equals start_date for a single day
   title: string;
-  owner: string | null;
+  /** A SECTIONS key, or null when unassigned. Colour-codes the month. */
+  section_key: string | null;
   status: ItemStatus;
   notes: string;
   updated_by: string;

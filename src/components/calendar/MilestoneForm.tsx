@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { ITEM_STATUS } from "@/config";
+import { ASSIGNABLE_SECTIONS, ITEM_STATUS } from "@/config";
 import type { ItemStatus } from "@/config";
 import type { Milestone } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
@@ -7,6 +7,15 @@ import { reportFromStatus } from "@/lib/useOnline";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Textarea } from "@/components/ui/Field";
 import { Select } from "@/components/ui/Select";
+
+/**
+ * "Unassigned" is a real choice, so it heads the list rather than being absent —
+ * an entry nobody has claimed yet is a normal state on a plan being drafted.
+ */
+const AREA_OPTIONS = [
+  { value: "", label: "— unassigned" },
+  ...ASSIGNABLE_SECTIONS.map((s) => ({ value: s.key, label: s.label })),
+];
 
 interface Props {
   milestone?: Milestone; // absent = creating
@@ -21,7 +30,7 @@ export function MilestoneForm({ milestone, defaultStart, defaultEnd, onDone, onC
   const [title, setTitle] = useState(milestone?.title ?? "");
   const [start, setStart] = useState(milestone?.start_date ?? defaultStart ?? "");
   const [end, setEnd] = useState(milestone?.end_date ?? defaultEnd ?? "");
-  const [owner, setOwner] = useState(milestone?.owner ?? "");
+  const [sectionKey, setSectionKey] = useState(milestone?.section_key ?? "");
   const [status, setStatus] = useState<ItemStatus>(milestone?.status ?? "todo");
   const [notes, setNotes] = useState(milestone?.notes ?? "");
   const [busy, setBusy] = useState(false);
@@ -39,7 +48,7 @@ export function MilestoneForm({ milestone, defaultStart, defaultEnd, onDone, onC
       title: title.trim(),
       start_date: start,
       end_date: end || start,
-      owner: owner.trim() || null,
+      section_key: sectionKey || null,
       status,
       notes: notes.trim(),
     };
@@ -86,10 +95,15 @@ export function MilestoneForm({ milestone, defaultStart, defaultEnd, onDone, onC
       </div>
 
       <div className="mb-3 grid grid-cols-2 gap-2">
-        <label className="block">
-          <Label>Who</Label>
-          <Input value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="—" />
-        </label>
+        <div>
+          <Label>Area</Label>
+          <Select
+            aria-label="Area"
+            value={sectionKey}
+            onChange={setSectionKey}
+            options={AREA_OPTIONS}
+          />
+        </div>
         <div>
           <Label>Status</Label>
           <Select

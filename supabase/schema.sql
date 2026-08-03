@@ -137,12 +137,12 @@ create table if not exists public.milestones (
   id         uuid primary key default gen_random_uuid(),
   start_date date not null,
   end_date   date not null,              -- windows, not single due dates
-  title      text not null default '',
-  owner      text,
-  status     text not null default 'todo',
-  notes      text not null default '',
-  updated_by text not null default '',
-  updated_at timestamptz not null default now(),
+  title       text not null default '',
+  section_key text,                       -- which area owns it; see SECTIONS
+  status      text not null default 'todo',
+  notes       text not null default '',
+  updated_by  text not null default '',
+  updated_at  timestamptz not null default now(),
 
   constraint milestones_status_valid check (
     status in ('todo', 'doing', 'done', 'blocked')

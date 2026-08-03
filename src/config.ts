@@ -104,6 +104,28 @@ export const SLOT_STATUS = ["idea", "contacted", "confirmed", "cancelled"] as co
  */
 export const ITEM_STATUS = ["todo", "doing", "done", "blocked"] as const;
 
+/**
+ * A calendar entry is assigned to an area rather than a person — each section
+ * already has one keeper, so the area answers "whose is this" and gives the month
+ * a colour to be scanned by.
+ *
+ * Reuses the eight validated inks rather than starting a third palette. All eight
+ * clear 4.5:1 at 11px composited over the paper; worst is BUDGET at 4.70.
+ */
+export const SECTION_CHIP: Record<string, string> = {
+  lineup: "bg-[#1A1A1A]/85 text-bg", // black
+  production: "bg-[#7A4B32]/85 text-white", // brown
+  logistics: "bg-[#2B5CA8]/85 text-white", // blue
+  communication: "bg-[#B82A1B]/85 text-white", // red
+  compilation: "bg-[#6B4C8A]/85 text-white", // purple
+  budget: "bg-[#2E6B4F]/85 text-white", // green
+  site: "bg-[#B07A1E]/85 text-fg", // ochre
+  team: "bg-[#8A8A8A]/85 text-fg", // grey
+};
+
+/** Areas a calendar entry can belong to — everything except the calendar itself. */
+export const ASSIGNABLE_SECTIONS = SECTIONS.filter((s) => s.key !== "calendar");
+
 export const ITEM_STATUS_CHIP: Record<(typeof ITEM_STATUS)[number], string> = {
   todo: "bg-[#8A8A8A]/85 text-fg",
   doing: "bg-[#2B5CA8]/85 text-white",
