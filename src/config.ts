@@ -57,7 +57,7 @@ export const SECTIONS = [
   {
     key: "communication",
     label: "COMMUNICATION",
-    owner: "",
+    owner: "Viva Iniesta",
     blurb: "Poster, socials, press and the announcement calendar.",
   },
   {
@@ -66,14 +66,14 @@ export const SECTIONS = [
     key: "calendar",
     label: "CALENDAR",
     bespoke: true,
-    owner: "",
+    owner: "Ikram Bouloum",
     blurb: "What has to happen when. Shared deadlines, month by month.",
   },
   {
     key: "compilation",
     label: "COMPILATION",
     bespoke: true,
-    owner: "",
+    owner: "Ikram Bouloum and Baba Sy",
     blurb: "Artists on the record: who is in, and who has sent their track.",
   },
   {
