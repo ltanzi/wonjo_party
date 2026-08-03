@@ -34,8 +34,10 @@ export const STAGES = [
  */
 export const SECTIONS = [
   {
-    key: "lineup",
-    label: "LINE-UP",
+    // The section is BOOKING — the activity. The page it opens is still the
+    // line-up: the timetable that activity produces, backed by the slots table.
+    key: "booking",
+    label: "BOOKING",
     bespoke: true,
     owner: "Ikram Bouloum",
     blurb: "Who plays, when and where — from first idea to confirmed.",
@@ -75,22 +77,22 @@ export const SECTIONS = [
     blurb: "Artists on the record: who is in, and who has sent their track.",
   },
   {
-    key: "budget",
-    label: "BUDGET",
+    key: "finance",
+    label: "FINANCE",
     owner: "",
     blurb: "Money in and money out. Fees, quotes, and what is still a guess.",
   },
   {
-    key: "site",
-    label: "DALLOU / SITE",
+    key: "workshops",
+    label: "WORKSHOPS",
     owner: "",
-    blurb: "The house and the ground. What is done, and what must be ready by January.",
+    blurb: "The daytime programme: what runs, who leads it, and where.",
   },
   {
-    key: "team",
-    label: "TEAM",
+    key: "volunteers",
+    label: "VOLUNTEERS",
     owner: "",
-    blurb: "Who is on the crew, what they do, and how to reach them.",
+    blurb: "Who is helping, what they are doing, and how to reach them.",
   },
 ] as const;
 
@@ -113,14 +115,14 @@ export const ITEM_STATUS = ["todo", "doing", "done", "blocked"] as const;
  * clear 4.5:1 at 11px composited over the paper; worst is BUDGET at 4.70.
  */
 export const SECTION_CHIP: Record<string, string> = {
-  lineup: "bg-[#1A1A1A]/85 text-bg", // black
+  booking: "bg-[#1A1A1A]/85 text-bg", // black
   production: "bg-[#7A4B32]/85 text-white", // brown
   logistics: "bg-[#2B5CA8]/85 text-white", // blue
   communication: "bg-[#B82A1B]/85 text-white", // red
   compilation: "bg-[#6B4C8A]/85 text-white", // purple
-  budget: "bg-[#2E6B4F]/85 text-white", // green
-  site: "bg-[#B07A1E]/85 text-fg", // ochre
-  team: "bg-[#8A8A8A]/85 text-fg", // grey
+  finance: "bg-[#2E6B4F]/85 text-white", // green
+  workshops: "bg-[#B07A1E]/85 text-fg", // ochre
+  volunteers: "bg-[#8A8A8A]/85 text-fg", // grey
 };
 
 /** Areas a calendar entry can belong to — everything except the calendar itself. */

@@ -39,7 +39,7 @@ function Gate() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         {/* Bespoke sections before the generic board */}
-        <Route path="/lineup" element={<LineupPage />} />
+        <Route path="/booking" element={<LineupPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/compilation" element={<CompilationPage />} />
         <Route path="/:sectionKey" element={<BoardRoute />} />

@@ -74,7 +74,7 @@ export function LineupPage() {
       <Header back />
 
       <SectionHeader
-        sectionKey="lineup"
+        sectionKey="booking"
         meta={
           showContent && (
             <span className="whitespace-nowrap font-mono text-[11px] uppercase tracking-wider text-muted">
