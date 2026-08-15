@@ -41,8 +41,14 @@ Each of these was argued through; the rationale matters as much as the choice.
 - **Budget is visible to all ten people.** Confirmed acceptable — the ten are trusted.
 - **Renames and date changes require a deploy by you.** Consequence of decision 9.
   Kept cheap by the slug-key design.
-- **Supabase free projects pause after ~7 days of zero activity.** One click to wake.
-  An actively-organising crew won't hit it; a quiet month before the festival might.
+- **Supabase free projects pause after ~7 days of zero activity.** One click to wake, and
+  no data is lost. This landed on 15 August 2026 as a "scheduled to be paused" warning —
+  earlier than expected, because usage is bursty rather than daily. Mitigated by a
+  Mon/Wed/Fri ping from .github/workflows/keepalive.yml. That is a patch, not a
+  guarantee: GitHub disables scheduled workflows after 60 days without repo activity,
+  and Supabase does not publish what counts as activity. **For December and January,
+  budget one month of Supabase Pro (~$25) rather than trusting the cron** — a pause
+  during the festival is the one time this actually costs something.
 - **No comments or discussion.** The `notes` field is it. Discussion stays in WhatsApp.
   Low risk here: in practice each section is held by **one person at most**, so the app is
   eight mostly-solo workspaces rather than a shared real-time surface. That also means the

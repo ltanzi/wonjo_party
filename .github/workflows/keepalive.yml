@@ -1,0 +1,35 @@
+name: Keep Supabase awake
+
+# Supabase pauses free projects after ~7 days without activity (SPEC.md, accepted
+# trade-offs). Between now and the festival the crew's usage is bursty — a quiet
+# fortnight is normal — so a small scheduled request keeps the project warm.
+#
+# Mon/Wed/Fri: a maximum gap of three days against a seven-day threshold, so a
+# skipped or delayed run cannot on its own cause a pause. GitHub's scheduled runs
+# are best-effort and often late; the margin absorbs that.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1,3,5"
+  workflow_dispatch: # so it can also be triggered by hand
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Touch the REST API
+        env:
+          URL: ${{ secrets.VITE_SUPABASE_URL }}
+          KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          # The anon key is public by design and RLS returns [] to it — the point
+          # is the request reaching the project, not the rows coming back.
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 \
+            "$URL/rest/v1/slots?select=id&limit=1" -H "apikey: $KEY")
+          echo "HTTP $code"
+          # Failing loudly matters: a red run emails us, which is the earliest
+          # warning that the project is already paused or the key has rotated.
+          if [ "$code" != "200" ]; then
+            echo "::error::Supabase did not answer with 200 — it may already be paused."
+            exit 1
+          fi
