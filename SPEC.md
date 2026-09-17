@@ -29,8 +29,8 @@ Each of these was argued through; the rationale matters as much as the choice.
 | 8 | **Stacked lists** per stage (reference layout), grid deferred | Times get decided last; a time-proportional grid is empty for months. Stacked degrades gracefully when `start_time` is null. Schema supports adding a two-column grid later with no migration. |
 | 9 | **Days and stages hardcoded** in config | User's call. Mitigated by storing stable slug keys in the DB (see below) so renaming a label can't orphan data. |
 | 10 | **Line-up covers all programming**, not only music | Workshops, talks, film, ceremony need a home, or the app's schedule won't match the schedule on the wall. |
-| 11 | **One generic board** for the non-bespoke squares | Every non-line-up section is the same shape: things with an owner, a state, and notes. One component, seven sections. Whole grid alive on day one. |
-| 12 | **Eight squares** (see below) | Budget and Dallou/Site were added during the interview — money is the #1 first-festival risk, and the house build overlaps the festival timeline. |
+| 11 | **One generic board** for the non-bespoke squares | Most sections are the same shape: things with an owner, a state, and notes. One component. Whole grid alive on day one. Ended up six sections, not seven — compilation and later the calendar earned bespoke pages. |
+| 12 | **Eight squares** (see below) | Budget and Dallou/Site were added during the interview — money is the #1 first-festival risk, and the house build overlaps the festival timeline. Now nine: a shared calendar took the empty centre cell in September 2026. |
 | 13 | **Cached reads, writes blocked offline**, staleness banner | The highest-stakes moment (backstage, 22:40, one bar of signal) is a *read*. Offline writes would mean conflict resolution for a problem that barely occurs. |
 | 14 | **Plain labelled squares** on the home page | User's call — the boldest, most beautiful version. Tile component takes an unused optional subtitle slot so live counts are a one-line addition later. |
 | 15 | **English, no i18n** | Gambia's official language is English; the brutalist style means ~30 words of UI chrome total. |
@@ -62,20 +62,28 @@ Each of these was argued through; the rationale matters as much as the choice.
 
 ## Squares
 
-Eight, in home-page order. **Line-up** and **compilation** are bespoke pages; the other
-six share one board component.
+Nine, filling the three-column grid exactly. **Booking**, **calendar** and
+**compilation** are bespoke pages; the other six share one board component.
 
 ```
-LINE-UP        PRODUCTION     LOGISTICS      COMMUNICATION
-COMPILATION    BUDGET         DALLOU / SITE  TEAM
+BOOKING        PRODUCTION      LOGISTICS
+COMMUNICATION  CALENDAR        COMPILATION
+FINANCE        WORKSHOPS       VOLUNTEERS
 ```
+
+CALENDAR sits at index 4 so it lands dead centre — the cell that was a deliberate blank
+while there were only eight squares.
+
+Renamed in September 2026 after real use: LINE-UP → BOOKING, BUDGET → FINANCE,
+TEAM → VOLUNTEERS, and DALLOU / SITE replaced by WORKSHOPS (that page was never used).
+Keys were renamed too, not just labels, with a migration — see `supabase/migrations/006`.
 
 ## Data model
 
-Three tables. Days, stages and sections are config, not data.
+Four tables. Days, stages and sections are config, not data.
 
 ```
-slots                              -- LINE-UP only
+slots                              -- BOOKING only (the line-up timetable)
   id            uuid pk
   day_key       text               -- 'day-1' | 'day-2' | 'day-3'
   stage_key     text               -- 'stage-playa' | 'stage-isla'
@@ -95,9 +103,23 @@ compilation                        -- COMPILATION, its own page
   email         text
   confirmed     boolean            -- 'Compilación: si' in the sheet it replaces
   sent          boolean            -- track received
+  drive_link    text               -- Google Drive URL for the file; '' when unset
   sort_order    int
   updated_by    text
   updated_at    timestamptz
+
+milestones                         -- CALENDAR, its own page
+  id            uuid pk
+  start_date    date               -- a window, not a due date
+  end_date      date               -- inclusive; equals start_date for a single day
+  title         text
+  section_key   text null          -- which area owns it; colour-codes the month
+  status        text               -- see ITEM_STATUS
+  notes         text
+  updated_by    text
+  updated_at    timestamptz
+  -- no sort_order: order is chronological by definition, so rows sort by
+  -- (start_date, end_date, id) — deterministic without a column nothing sets
 
 items                              -- the six generic board squares
   id            uuid pk
@@ -141,16 +163,27 @@ STAGES = [
   { key: 'stage-isla',  label: 'ISLA'  },
 ]
 
+// Each also carries `owner` (social, not enforced) and `blurb` (kept under ~90
+// chars so it sits on one line). Order matters: index 4 is the centre cell.
 SECTIONS = [
-  { key: 'lineup',        label: 'LINE-UP',       bespoke: true },
+  { key: 'booking',       label: 'BOOKING',       bespoke: true },
   { key: 'production',    label: 'PRODUCTION'    },
   { key: 'logistics',     label: 'LOGISTICS'     },
   { key: 'communication', label: 'COMMUNICATION' },
-  { key: 'compilation',   label: 'COMPILATION'   },
-  { key: 'budget',        label: 'BUDGET'        },
-  { key: 'site',          label: 'DALLOU / SITE' },
-  { key: 'team',          label: 'TEAM'          },
+  { key: 'calendar',      label: 'CALENDAR',      bespoke: true },
+  { key: 'compilation',   label: 'COMPILATION',   bespoke: true },
+  { key: 'finance',       label: 'FINANCE'       },
+  { key: 'workshops',     label: 'WORKSHOPS'     },
+  { key: 'volunteers',    label: 'VOLUNTEERS'    },
 ]
+
+// One ink per area, so a calendar month reads by colour. Same eight validated
+// inks as FORMATS — no third palette.
+SECTION_CHIP = {
+  booking: '#1A1A1A',  production: '#7A4B32',  logistics:  '#2B5CA8',
+  communication: '#B82A1B', compilation: '#6B4C8A', finance: '#2E6B4F',
+  workshops: '#B07A1E', volunteers: '#8A8A8A',
+}
 
 SLOT_STATUS  = ['idea', 'contacted', 'confirmed', 'cancelled']
 ITEM_STATUS  = ['todo', 'doing', 'done', 'blocked']
@@ -167,10 +200,13 @@ FORMATS = [
 ]
 ```
 
-Badge weights follow one rule, no arbitrary cases: **plain** = evening stage acts (the
-majority — badges everywhere would be noise), **solid** (white on `#1A1A1A`) = daytime
-programming, **accent** (white on `#E63B2E`) = the special one. Same logic as the Sónar
-reference.
+All nineteen pairings — seven formats, four status chips, eight section chips — clear
+4.5:1 at the 11px they render at, composited over the paper. The binding one is
+`performance` at 4.71; the true floor is 0.83, so 85% is that plus margin. Lightening an
+ink lowers contrast against white labels but *raises* it against dark ones, so the ochre
+and grey chips gain from the transparency. A/V uses a deeper red than the UI accent
+because `#E63B2E` manages only 4.18 on white and fails AA even fully opaque — the same
+reason the offline banner does not use it.
 
 ## Design
 
@@ -216,7 +252,7 @@ Matches the reference. Day bar, then per stage a bar, then rows.
   `N cancelled ▾` reveal rather than sitting in the timetable.
 - Null times render as `—`; rows fall back to `sort_order`.
 - Attribution is a quiet grey line under the row.
-- Section header reads `LINE-UP · kept by <name>` — social ownership, not enforced.
+- Section header reads `BOOKING · kept by <name>` — social ownership, not enforced.
 
 ## Offline behaviour
 
@@ -254,7 +290,7 @@ the one you have opinions about — if the design language is wrong, this is whe
 out, not after it's replicated seven more times.
 
 ### Pass 2 — boards + offline + handover ✅ built
-7. Generic board component wired to the seven remaining sections.
+7. Generic board component wired to the remaining sections.
 8. Offline read cache + staleness banner.
 9. Provision the remaining eight accounts, hand over. ← still to do
 
@@ -296,6 +332,44 @@ themes worth remembering, because they are the ones that recur:
 - **Comments stating numbers were wrong more often than the code was.** The contrast
   floor, the column width, the mechanism behind the strikethrough. A confident wrong
   comment is worse than none, because the next reader has no reason to re-derive it.
+
+### Changed in use, after handover
+
+The crew have been using it since late July. What they asked for, and what it taught:
+
+- **Artist suggestions on the booking form.** Names from the compilation list, offered as
+  type-ahead. First built with a native `<datalist>`, which was wrong: browsers disagree
+  on how they match against it — Chrome matches anywhere in the string — and that cannot
+  be set from HTML or CSS. Replaced with a small combobox so the filter is ours
+  (`startsWith`, case-insensitive). Never a closed set: booking someone not on the list is
+  a normal case.
+- **A Drive link on the compilation.** One column, rendered as `open ↗` only when the
+  value is genuinely an `http(s)` URL, so a row edited in the dashboard cannot turn the
+  table into a link pointing somewhere unintended. A bare paste gets its scheme added —
+  without one the link resolves relative to this site and 404s inside the app.
+- **A shared calendar**, because the plan was living in a message thread. Written as date
+  *windows* ("3–16 de agosto") with several tasks sharing one, so it needed its own table:
+  the generic board has a single due date. Grouping is derived from the dates rather than
+  stored, so there is no separate "period" entity to keep in step.
+- **Calendar entries belong to an area, not a person.** Each section already has one
+  keeper, so naming the area answers "whose is this" and gives the month a colour to scan
+  by. Status became a word rather than a second chip: two coloured chips drawn from one
+  palette would read as two facts of the same kind.
+- **Sections renamed** — see Squares above.
+
+### What broke, and why it is worth remembering
+
+- **A cached row outlived a migration.** `drive_link` was added, and `DriveLink` typed its
+  prop as `string` and called `.trim()`. Rows rendered from `localStorage` predated the
+  column, so the value was `undefined`, the throw happened during render, and with no
+  error boundary React unmounted the whole tree — a blank page. Every check passed,
+  because `curl` has no cache and only a browser that had used the page before the deploy
+  could reproduce it. Fixed three ways: the field is optional, the cache prefix is
+  versioned (bump it whenever a row type changes shape), and there is now an error
+  boundary offering "clear saved data".
+- **The free-tier pause cannot be worked around.** A scheduled anonymous REST ping ran on
+  time and succeeded for ten days; the project paused anyway. See the trade-off note above.
+  The workflow is kept as a monitor, not a fix.
 
 ## Open items
 
