@@ -77,15 +77,16 @@ delete from public.slots;
 delete from public.items;
 ```
 
-## Keeping the database awake
+## When the database pauses
 
-Supabase pauses free projects after about a week without activity, so
-`.github/workflows/keepalive.yml` pings it Mon/Wed/Fri. If that job goes red, the
-project is likely already paused: open the Supabase dashboard and hit **Restore**.
-Nothing is lost by a pause — the data is intact, it is only unreachable.
+Supabase pauses free projects after about a week without activity. Restoring takes a
+couple of minutes from the dashboard and loses nothing — **but a paused project cannot
+be restored at all after 90 days**, so do not leave it.
 
-Note GitHub stops running scheduled workflows on a repo with no activity for 60 days,
-so this protects a quiet autumn, not an abandoned one.
+`.github/workflows/supabase-health.yml` checks Mon/Wed/Fri and fails loudly when the
+project stops answering, which is the earliest warning you will get. It does **not**
+prevent pausing: that was tried, and anonymous REST pings do not count as activity
+(see the trade-off note in `SPEC.md`). Only a Pro subscription removes pausing.
 
 ## Migrations
 

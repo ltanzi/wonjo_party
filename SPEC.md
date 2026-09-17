@@ -41,14 +41,16 @@ Each of these was argued through; the rationale matters as much as the choice.
 - **Budget is visible to all ten people.** Confirmed acceptable — the ten are trusted.
 - **Renames and date changes require a deploy by you.** Consequence of decision 9.
   Kept cheap by the slug-key design.
-- **Supabase free projects pause after ~7 days of zero activity.** One click to wake, and
-  no data is lost. This landed on 15 August 2026 as a "scheduled to be paused" warning —
-  earlier than expected, because usage is bursty rather than daily. Mitigated by a
-  Mon/Wed/Fri ping from .github/workflows/keepalive.yml. That is a patch, not a
-  guarantee: GitHub disables scheduled workflows after 60 days without repo activity,
-  and Supabase does not publish what counts as activity. **For December and January,
-  budget one month of Supabase Pro (~$25) rather than trusting the cron** — a pause
-  during the festival is the one time this actually costs something.
+- **Supabase free projects pause after ~7 days of zero activity.** One click to restore,
+  no data lost — but a paused project cannot be restored at all after 90 days.
+  **Tested and settled: a scheduled anonymous REST ping does NOT prevent this.** The cron
+  in .github/workflows ran on time and succeeded every Mon/Wed/Fri from 24 Aug to 2 Sep
+  2026; the project paused anyway on ~3 Sep. Anonymous requests do not register as
+  activity. The workflow is kept as a *monitor* — a red run caught that pause within two
+  days — but it prevents nothing. Paused twice in three weeks (15 Aug, 3 Sep) because
+  usage is genuinely sparse this far out. **Supabase Pro (~$25/mo) is the only reliable
+  fix; budget it for December and January at the latest, when a dead app would actually
+  cost something.**
 - **No comments or discussion.** The `notes` field is it. Discussion stays in WhatsApp.
   Low risk here: in practice each section is held by **one person at most**, so the app is
   eight mostly-solo workspaces rather than a shared real-time surface. That also means the
